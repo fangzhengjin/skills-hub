@@ -1,0 +1,4 @@
+interface:
+  display_name: "拾景纸刊 v1.3"
+  short_description: "以简化插画、结构性色彩和手撕纤维边缘重组真实照片的纸像海报工具"
+  default_prompt: "Use $scenes-gathered-zine-v1-3 to transform this photo into a source-faithful paper poster with simplified abstract forms, integrated chromatic structure, and a visible hand-torn fibrous edge."

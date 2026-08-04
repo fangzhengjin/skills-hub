@@ -1,0 +1,4 @@
+interface:
+  display_name: "Scene Distillation Zine v1.3"
+  short_description: "把照片蒸馏为文字完全自由、表达优先的艺术纸刊插画作品"
+  default_prompt: "Use $scene-distillation-zine-v1-3 to transform this photo into an expressive zine illustration with unrestricted authorial typography."

@@ -1,0 +1,36 @@
+name: Sync skills
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4,10,16,22 * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Sync skills
+        run: python3 .github/scripts/sync_skills.py
+
+      - name: Commit changes
+        run: |
+          git add -- README.md skills
+          if git diff --cached --quiet; then
+            echo "No skill changes"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync skills"
+          git push

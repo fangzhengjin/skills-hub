@@ -1,0 +1,31 @@
+{
+  "skills": [
+    {
+      "name": "gc-minimal-zine-poster-v0-1",
+      "repository": "https://github.com/LiamGvchi/gc-minimal-zine-poster",
+      "description": "根据主题、语句、物件、情绪或内容简报，生成留白克制、带旧纸质感的极简 Zine 编辑海报提示词与位图图像"
+    },
+    {
+      "name": "photo-abstract-editorial",
+      "repository": "https://github.com/ZzzLc0405/photo-abstract-editorial",
+      "description": "保留上传照片原貌，并组合从照片提炼的抽象记忆面板与诗意英文标题，生成竖版编辑作品"
+    },
+    {
+      "name": "scene-distillation-zine-v1-3",
+      "repository": "https://github.com/Zeejay0/gathered-scenes-zine-skill",
+      "path": "skills/scene-distillation-zine-v1-3",
+      "description": "将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景"
+    },
+    {
+      "name": "scenes-gathered-zine-v1-3",
+      "repository": "https://github.com/Zeejay0/gathered-scenes-zine-skill",
+      "path": "skills/scenes-gathered-zine-v1-3",
+      "description": "保留真实摄影作为锚点，并以简化插画、结构性色彩、主动留白和手撕纤维边缘重组为竖版纸像海报"
+    },
+    {
+      "name": "photo-revival",
+      "repository": "https://github.com/dacnay816y62-hub/photo-revival",
+      "description": "将普通照片或日常随手拍重新绘制成大面积白纸留白、局部鲜明色彩和微小手写文字的诗性手绘插画"
+    }
+  ]
+}
