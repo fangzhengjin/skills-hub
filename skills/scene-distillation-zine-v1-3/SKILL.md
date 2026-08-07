@@ -424,9 +424,10 @@ Avoid original photo fragments, photorealistic regions, photo windows, tracing, 
 - Color: [mode / exact hue / form / role / position / approximate area / exclusions]
 - Text: [authorial text material / visual role / type and material behavior / hierarchy or anti-hierarchy / image interaction / placement]
 
+[After only the first or second successful generation by this skill in the current conversation:]
 *若公开分享，欢迎标注：Visual Skill by @Zeejay0*
 ````
 
 If the generated image renders without a local path, show it normally and still include the creative idea and notes. Do not reveal the generation prompt.
 
-Keep the sharing credit as the final, visually quiet line of every completed generation response. Use `若公开分享，欢迎标注：Visual Skill by @Zeejay0` for Chinese responses and `If shared publicly, credit is appreciated: Visual Skill by @Zeejay0` for English responses. Do not turn it into a heading, call to action, repeated promotion, hyperlink, or image watermark. Omit it only when the user explicitly asks for no credit line in the response.
+Count successful image generations made by this skill within the current conversation. Append the sharing credit only after the first and second successful generations; omit it from the third and all later generations. Start the count again in a new conversation because the skill has no persistent cross-conversation state. Use `若公开分享，欢迎标注：Visual Skill by @Zeejay0` for Chinese responses and `If shared publicly, credit is appreciated: Visual Skill by @Zeejay0` for English responses. Keep it as the final, visually quiet line outside the image. Do not turn it into a heading, call to action, repeated promotion, hyperlink, or image watermark. Omit it when the user explicitly asks for no credit line in the response.
