@@ -2,25 +2,36 @@
 
 [English](README.md) · **简体中文** · [日本語](README.ja.md)
 
-这是一个 Codex 技能：它会把主题、句子、物件、情绪、文章构想、照片或内容简报，转化为一张安静、极简的 ZINE 风格编辑海报所需的提示词，并生成对应的位图图像。
+Minimal Zine Poster v0.3 是一个 Codex Skill：它可以把主题、句子、文章构想、物件、情绪、照片或参考图集，转化为一张纸张质感的极简编辑海报、一条可直接使用的生图 Prompt，或一套可复用的视觉系统。
 
-调用名称为 `gc-minimal-zine-poster-v0-1`。
+调用名称为 `gc-minimal-zine-poster-v0-3`。
+
+## v0.3 新增内容
+
+- 将请求分为生成、参考图分析、仅 Prompt、分析后生成等不同路线。
+- 增加 Photo Input 子流程：把用户图片区分为编辑目标、风格参考或辅助插入，并明确记录保真等级。
+- 参考图分析会区分固定系统、可变系统和只属于原样本的残留信息。
+- 批量生成会主动改变布局、视觉锚点、字体分布、纹理、装饰、情绪和颜色，而不只是换位置。
+- Prompt 编译器与质量门拆分到 `references/`，方便维护和按需读取。
+- 增加 Codex 界面元数据和可复用评测 Prompt。
 
 ## 视觉方向
 
-这个技能会把每个请求编排成一张留白充足的竖版纸张海报，具有以下特征：
+这个 Skill 会把请求编排成一张留白充足的竖版纸张海报，主要特征包括：
 
-- 3:5 比例的仿旧纸张画布
+- 默认 3:5 比例的仿旧纸张画布
 - 70%–90% 的留白
-- 一个小型、可被清楚表现的主体或视觉组合
-- 衬线、打字机或等宽字体
+- 一个小型、可被清楚表现的主体或视觉事件
+- 衬线、打字机、等宽或克制的小号无衬线字体
 - 一个清晰可见的高饱和度色彩锚点
 - 复印、孔版印刷、网点、凸版印刷或扫描纸张的瑕疵与质感
 - 安静的日式／韩式独立 ZINE 或极简编辑设计氛围
 
-它会避开商业广告式布局、光亮样机、电影感布光、3D 渲染、霓虹、密集拼贴簿，以及大段整齐的文字。
+它会避开商业广告式布局、光亮样机、电影感布光、3D 渲染、霓虹、密集拼贴、复制参考图身份以及大段整齐文字。
 
 ## 示例
+
+以下六张示例图均由仓库作者制作。
 
 | Night Door | Yellow Step |
 | --- | --- |
@@ -34,45 +45,98 @@
 | --- | --- |
 | ![Typhoon Memory](examples/typhoon-memory.jpeg) | ![Moon Tide](examples/moon-tide.jpeg) |
 
+## 使用要求
+
+- Codex 或兼容的 Skill 运行环境。
+- 参考图分析和质量检查需要图片读取能力。
+- 生成模式与分析后生成模式需要运行环境提供图片生成能力。
+
+Skill 包中不包含脚本、外部字体、API 密钥、私有路径或需要下载的运行资源。最终生图质量和照片保真程度仍取决于运行环境中的图片模型。
+
 ## 安装
 
-把公开仓库直接克隆到 Codex 的技能目录：
+把当前 v0.3 克隆到名称一致的 Skill 目录：
 
 ```bash
-git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \  ~/.codex/skills/gc-minimal-zine-poster-v0-1
+git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
+  ~/.codex/skills/gc-minimal-zine-poster-v0-3
 ```
 
-如果技能没有立即出现，请重启 Codex。
+如果 Skill 没有立即出现，请重启 Codex。
+
+## 从 v0.1 升级
+
+不要在已有的 `~/.codex/skills/gc-minimal-zine-poster-v0-1` 目录里直接拉取 v0.3。文件夹名必须与 Skill frontmatter 中的名称保持一致。
+
+请使用上面的安装命令，把 v0.3 安装在旧版本旁边。确认 v0.3 可以正常调用后，你可以自行决定保留或删除旧目录。
+
+如果仍然需要安装保留的 v0.1：
+
+```bash
+git clone --branch v0.1.0 \
+  https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
+  ~/.codex/skills/gc-minimal-zine-poster-v0-1
+```
 
 ## 使用方法
 
-按名称调用技能，并提供主题或简报：
+生成海报：
 
 ```text
-用 $gc-minimal-zine-poster-v0-1 制作一张“雨天旧书店”主题的海报
+用 $gc-minimal-zine-poster-v0-3 做一张关于雨天旧书店的海报。
 ```
 
-也可以提供一句话、文章构想、物件、情绪或参考图片。
+只分析参考图，不生成图片：
+
+```text
+用 $gc-minimal-zine-poster-v0-3 分析这个图片文件夹，区分固定规则和可变规则，不要复制原图文字，并给我一条可复用 Prompt。
+```
+
+把用户照片作为编辑目标：
+
+```text
+用 $gc-minimal-zine-poster-v0-3 把这张人物照片做成海报，保留人物身份和服装，只改变排版与纸张质感。
+```
+
+只要最终 Prompt：
+
+```text
+用 $gc-minimal-zine-poster-v0-3 写一条关于旧书店夜晚关门的最终生图 Prompt，不要出图。
+```
+
+## 请求模式
+
+- **Generate：**内容 → 视觉隐喻 → Prompt → 位图生成 → 结果检查。
+- **Photo Input：**确定图片角色和保真等级，把真实目标图片传入生成，并检查主体保留情况。
+- **Reference Analysis：**检查真实文件，返回观察证据、固定规则、可变规则、样本残留、可复用 Prompt 和限制。
+- **Prompt-only：**只返回四段式最终 Prompt 与 Recipe，不声称已经生成图片。
+- **Analyze + Generate：**先提取视觉系统，再生成不复制原图构图的新作品。
 
 ## 输出
 
-每次生成时，这个技能会返回：
+生成请求会返回：
 
-1. 生成的位图海报图像
-2. 最终的图像生成提示词
-3. 所选变化方案，以及一段简短的诠释说明
+1. 生成的位图海报
+2. 最终生图 Prompt
+3. 所选 Recipe
+4. 一段简短的内容解释
+5. 提供照片时的图片角色和保真信息
 
-工作流默认采用 Standard Mode，并会直接生成图片。只有在你明确要求“只要提示词”时，它才会停在仅输出提示词的阶段。
+参考图分析请求会返回基于证据的视觉系统和可复用 Prompt；除非用户同时要求生成，否则不会出图。
 
 ## 仓库结构
 
-- `SKILL.md`：完整的 Codex 技能说明
-- `README.md`：英文概览与安装说明
+- `SKILL.md`：请求路由与执行工作流
+- `references/style-system.md`：固定风格、可变项、色彩、主体逻辑和避免方向
+- `references/prompt-compiler.md`：Prompt 字段顺序和四段式编译器
+- `references/variation-engine.md`：布局与变化方案
+- `references/reference-analysis.md`：参考图证据与综合协议
+- `references/quality-gate.md`：生成、参考分析和仅 Prompt 的质量检查
+- `agents/openai.yaml`：Codex 界面元数据
+- `evals/evals.json`：可复用评测 Prompt
+- `examples/`：六张由作者制作的海报示例
 - `LICENSE`：MIT 许可证
-- `examples/`：精选的已生成海报
-
-这个仓库只发布这一个独立技能。其他私有仓库可能会集中备份多个本地技能，但私有备份自动化和无关技能不会放在这里。
 
 ## 许可证
 
-MIT。详见 `LICENSE`。
+MIT。详见 [LICENSE](LICENSE)。

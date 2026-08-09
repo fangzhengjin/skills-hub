@@ -1,0 +1,54 @@
+{
+  "skill_name": "gc-minimal-zine-poster-v0-3",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "用 $gc-minimal-zine-poster-v0-3 做一张关于‘错过的夏天’的海报，别再用居中小照片加蓝点。",
+      "expected_output": "Uses Generate Mode, derives one imageable metaphor, chooses a non-default layout and anchor treatment, generates a raster image, inspects it at thumbnail scale, and returns the image, four-paragraph prompt, recipe, and concise interpretation.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "把这篇关于人与人逐渐疏远的文章做成一张极简纸感海报。",
+      "expected_output": "Reduces the article to one visual relation instead of illustrating every point, preserves 70%-90% paper space and one clear high-chroma anchor, generates and checks the image, and reports the final prompt and recipe.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "分析这些参考图，提炼固定规则和可变规则，不要复制图里的文字，然后给我一个可复用 Prompt。",
+      "expected_output": "Inspects the attached examples and their metadata, separates observed evidence, fixed system, variable system, and sample residue, then returns a source-safe reusable prompt, randomization block, avoid list, and confidence limits without claiming to generate an image.",
+      "files": [
+        "examples/moon-tide.jpeg",
+        "examples/night-door.jpeg",
+        "examples/pause-map.jpeg",
+        "examples/shore-pause.jpeg",
+        "examples/typhoon-memory.jpeg",
+        "examples/yellow-step.jpeg"
+      ]
+    },
+    {
+      "id": 4,
+      "prompt": "只给我一条关于旧书店关门的最终生图 Prompt，不要出图。",
+      "expected_output": "Uses Prompt-only Mode, returns a concrete four-paragraph prompt, recipe, and relevant negative constraints, and does not imply that an image was generated or inspected.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "用这张人物照片做一张海报，人物还是要一眼认得出来。",
+      "expected_output": "Uses Photo Input Mode with the photograph as an edit target and High preservation, inspects and passes the actual image into generation, records visible identity invariants, prefers a photo crop or printed fragment over redrawing, checks identity after generation, and reports photo role and preservation details.",
+      "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "保留照片里这个产品的外形和结构，换成极简纸感海报。",
+      "expected_output": "Treats the product photograph as an edit target with High preservation, records product geometry, silhouette, component count, proportions, and recognizable colors as invariants except where the user permits change, passes the image into generation, and rejects or regenerates a result with material structural drift.",
+      "files": []
+    },
+    {
+      "id": 7,
+      "prompt": "只参考这张海报的排版和纸张质感，做一个关于雨天的全新海报。",
+      "expected_output": "Treats the supplied poster as a reference image with Low preservation, inspects its layout and paper traits, creates a new rain subject and composition, does not preserve or reproduce the source subject or wording, and reports the reference-only role.",
+      "files": []
+    }
+  ]
+}

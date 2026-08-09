@@ -1,206 +1,113 @@
 ---
-name: gc-minimal-zine-poster-v0-1
-description: Generate Minimal Zine Poster v0.1 poetic paper-poster prompts and the matching generated image. Use when the user gives a theme, sentence, object, mood, article idea, photo, or content brief and wants a quiet Japanese/Korean zine-like editorial poster with large negative space, aged paper texture, experimental typography, restrained color accents, and a generated bitmap image.
+name: gc-minimal-zine-poster-v0-3
+description: Generate or analyze poetic paper-texture minimal zine posters with large negative space, a small editorial collage or visual anchor, experimental typography, and one clear color accent. Use when the user gives a theme, sentence, article, mood, object, photo, content brief, reference images, or an image folder and wants a final poster image, a production-ready image prompt, reusable style rules, or varied layouts that stay in one visual family.
 ---
 
-# Minimal Zine Poster v0.1
+# Minimal Zine Poster v0.3
 
-Turn the user's content into both:
+Turn content or visual references into a coherent paper-poster system. Preserve the original production contract: unless the user explicitly asks for analysis or prompt-only output, return both a final image-generation prompt and the generated raster image.
 
-1. a final image-generation prompt, and
-2. a generated raster image made from that prompt.
+## Route The Request
 
-## Mode Policy
+Choose the smallest mode that satisfies the request:
 
-Use **Standard Mode** for all generation. Use the Standard Mode Prompt Compiler in this `SKILL.md` to convert the user's content into a compact, imageable, high-fidelity prompt. If the user asks for higher quality, strengthen the prompt using the rules below.
+- **Generate Mode — default:** theme, sentence, article, object, mood, photo, or brief → visual metaphor → prompt → generated image → inspection.
+- **Photo Input Mode — Generate subflow:** a supplied photograph that should affect the output → classify its role and preservation level → pass the actual image into generation → inspect both poster quality and source preservation.
+- **Reference Analysis Mode:** reference images or a folder plus a request to analyze, extract, or systematize the style → evidence-based style rules and reusable prompt. Do not generate an image unless requested.
+- **Prompt-only Mode:** use only when the user explicitly asks for a prompt without image generation.
+- **Analyze + Generate:** when the user asks to learn from references and make a new poster, run Reference Analysis first, then Generate Mode with the extracted system.
 
-## Standard Mode Prompt Compiler
+If the intent is ambiguous but clearly asks to “做一张”, use Generate Mode. Do not stop to ask about choices the skill can make safely.
 
-Default generation should compile only the parts that become pixels in the final image prompt.
+## Load The Relevant References
 
-### Visual Rules Used by the Prompt Compiler
+- Read `references/style-system.md` for every mode.
+- Read `references/prompt-compiler.md` for Generate and Prompt-only modes.
+- Read `references/variation-engine.md` before choosing a generation recipe or batch plan.
+- Read `references/reference-analysis.md` whenever reference images or folders are supplied for analysis.
+- Read `references/quality-gate.md` before returning a generated image or style analysis.
 
-Use these rule groups as prompt material:
+## Source And Reference Boundaries
 
-- **风格总述:** use only the visual identity and anti-identity: poetic minimal paper poster, huge negative space, old paper, tiny anchor, sparse type, one clear high-chroma anchor, zine/editorial mood.
-- **核心视觉规则:** use the concrete renderable rules for canvas, composition, background, image anchor, typography, color, texture, lighting, and mood.
-- **稳定共性:** use as non-negotiable must-haves: vertical 3:5 paper canvas, small cluster, scanned-paper view, old print defects, serif/typewriter text, and a saturated color anchor visible at thumbnail size.
-- **可替换变量:** use as slot choices: object, photo/cutout/silhouette/block type, accent color, text line, date/weather, position, paper tone.
-- **反向约束:** use as negative prompt material.
-- **Prompt 结构模板:** use its field order, not its sample wording.
+- Inspect actual supplied images before making claims about their dimensions, ratios, layout, color, or texture.
+- Separate observed traits from interpretation. Use file metadata for dimension and ratio claims when possible.
+- Do not copy source text, brands, watermarks, signatures, exact dates, exact locations, or an exact composition from reference-only images.
+- User-supplied text may be placed in the new poster when the user explicitly asks for it. Keep it short because image models distort long text.
+- For reference-only images, learn the visual grammar rather than copying the source identity, exact subject, wording, or composition. For edit targets, preserve the declared subject invariants and change only what the selected preservation level permits.
+- If files are missing or unreadable, state the limitation instead of inventing an analysis.
 
-Do not use these as default prompt material:
+## Photo Input Mode
 
-- source path, sample count, README/metadata notes, or analysis scope
-- long explanatory prose about why the style works
-- sample-specific signatures, dates, captions, objects, or text
-- example prompts as text to imitate line by line
-- checklist phrasing unless it becomes a concrete visual constraint
+Use this mode whenever a user-supplied photograph should materially affect the generated poster. Before compiling the prompt, assign every supplied image one role:
 
-### First-Principles Prompt Fields
+- **Edit target:** the photograph or its recognizable subject must appear in the final poster.
+- **Reference image:** use only its style, color, composition, texture, or mood; do not preserve its exact subject or identity.
+- **Supporting insert:** use one specified person, object, texture, or fragment from the photograph inside a new composition.
 
-Every Standard Mode prompt must answer these rendering questions in this order:
+Classify from observable wording:
 
-1. **Canvas:** What is the output frame and base surface?
-   - tall vertical 3:5 phone-poster; full-frame aged paper; no border, no mockup.
+- “把这张照片做成海报”, “基于这张图改”, or “保留这个人、产品、宠物” → edit target.
+- “参考这张图的风格、配色、构图” → reference image.
+- “把照片里的这个人或物体放进去” → supporting insert.
+- A supplied photograph plus only “做一张” → edit target, because silently discarding the supplied subject is the more destructive interpretation.
 
-2. **Attention Geometry:** Where does the eye go and how much is empty?
-   - 70%-90% plain paper; one visual cluster occupying about 8%-25%; placed center, upper-middle, lower-middle, lower-left, or upper-right; no edge-hugging.
+Ask only when two materially different roles remain equally plausible.
 
-3. **Image Anchor:** What is the one imageable subject?
-   - convert the user's theme into one object, fragment, photo crop, specimen, cutout, silhouette, old printed illustration, texture window, or small conceptual relation.
+Choose and record one preservation level:
 
-4. **Anchor Treatment:** What material process makes the anchor belong to paper?
-   - grayscale photos and paper fragments may use low contrast, photocopy softness, torn edge, softened edge, halftone, scanline, risograph grain, xerox wear, ink bleed, or slight misregistration. Do not apply low saturation or low contrast to the chosen color anchor.
+- **High:** preserve identity, facial structure, body proportions, pose when relevant, defining markings, product geometry, object count, silhouette, and recognizable colors, except traits the user explicitly lists as permitted changes. Prefer an original-photo crop, clipping, or printed fragment over redrawing the subject.
+- **Medium:** preserve the main subject and defining characteristics while allowing crop, scale, palette, surface treatment, and surrounding composition to change.
+- **Low:** reference-only; preserve visual grammar or mood, not the source subject or exact composition.
 
-5. **Typography System:** How does text behave visually?
-   - small serif/typewriter/monospaced type; one short readable phrase; optional tiny date/location/weather and signature; semi-legible microtext or fragmented letters; text can drift, press against the image edge, blur, or misregister.
+Use High preservation for identifiable people, pets, characters, artworks, and products unless the user explicitly permits reinterpretation.
 
-6. **Color Logic:** What is the restrained accent strategy?
-   - paper tones plus gray/black support one unmistakably high-chroma anchor. Prefer cobalt or ultramarine; rotate through cyan, violet, magenta-pink, lemon yellow, pear green, orange, or tomato red. The color may be the subject, a flat silhouette, an irregular cutout, a substantial block, a partial-color photo region, or bold fragmented type. It must not be reduced automatically to a tiny dot or hairline.
+Run the photo workflow:
 
-7. **Reproduction Texture:** What print/scanning process defines the whole image?
-   - flat orthographic scanned-paper appearance; matte absorbent paper; diffuse light; low-to-medium contrast; no hard shadow; no 3D depth.
+1. Inspect every supplied image before describing or using it. Record available dimensions, ratio, main subject, important details, and visible text or branding.
+2. List concrete preservation invariants for each edit target or supporting insert. Include only traits visible in the source or explicitly supplied by the user.
+3. Pass the actual input image to the built-in image-generation tool. Use `referenced_image_paths` when every target image has a local path. Use `num_last_images_to_include` when at least one target exists only in the conversation, choosing the smallest number that includes every target, up to five. Never use both mechanisms in one call. If neither mechanism can include every target, ask the user to attach the missing images again.
+4. Compile the prompt with three explicit parts: what must remain recognizable, what may change, and what new poster elements may be introduced.
+5. Generate the sparse vertical paper poster and inspect it against both `references/quality-gate.md` and the preservation invariants.
+6. If an edit target is no longer recognizable or a required invariant drifts, regenerate once with tighter invariants and fewer permitted changes. If the second result still fails, state the preservation limitation instead of presenting it as fully successful.
 
-8. **Emotional Temperature:** What should the viewer feel before identifying the object?
-   - quiet, poetic, nostalgic, sparse, diary-like, archival, distant, memory-like, Japanese/Korean indie zine or minimal editorial.
+## Generate Mode Workflow
 
-9. **Hard Avoids:** What must not appear?
-   - full-bleed scene, commercial headline, product ad, logo/CTA, glossy mockup, clean UI white, cinematic lighting, 3D, neon, cute cartoon, fashion editorial drama, dense scrapbook, too many colors, long clean text.
+1. **Parse the content.** Identify the core subject, emotional temperature, supplied text, and every input image role. When a photograph is supplied, complete Photo Input Mode before choosing the metaphor. For an article or abstract idea, reduce it to one central imageable relation rather than illustrating the whole argument.
+2. **Choose one visual metaphor.** Use one object, fragment, photo crop, specimen, silhouette, printed illustration, texture window, typographic object, or small conceptual relation. Avoid a full illustrated scene.
+3. **Select a variation recipe.** Choose one layout family, anchor type, typography mode, texture mode, mood, paper tone, accent hue, and decorative-mark system from `references/variation-engine.md`. Randomness must change visual grammar, not only position.
+4. **Compile the prompt.** Follow the field order and four-paragraph shape in `references/prompt-compiler.md`. State the anchor position and size, exact high-chroma hue, material form, and approximate visual share.
+5. **Generate the image.** Use the built-in image-generation capability. For Photo Input Mode, include the actual supplied image through the mechanism defined above. Do not return prompt-only output unless the user requested it.
+6. **Inspect the actual result.** Apply `references/quality-gate.md` at full view and thumbnail scale. For Photo Input Mode, also compare the result with the source image and declared preservation invariants. If the result clearly violates the chosen recipe, loses the color anchor, becomes commercial/full-bleed, collapses into an unrelated style, or breaks required preservation, tighten the prompt and regenerate once.
+7. **Return the image, final prompt, recipe, one short interpretation note, and photo role/preservation details when applicable.**
 
-### Standard Color Engine
+## Reference Analysis Workflow
 
-This section defines the color strategy for Standard Mode.
+1. Resolve the supplied files and inspect every usable image; record dimensions and ratios when available.
+2. Extract repeated traits across canvas, negative space, background, subject scale, collage method, composition, typography, color, texture, decorative marks, mood, and wrong directions.
+3. Distinguish:
+   - **fixed system:** traits required for family resemblance;
+   - **variable system:** traits that may change without breaking the family;
+   - **sample residue:** words, brands, objects, dates, or layouts that belong only to individual references and must not be reused.
+4. Use measurable ranges only when the files support them. Do not present a single-image trait as a collection-wide rule.
+5. Return the analysis format defined in `references/reference-analysis.md`.
+6. If generation was also requested, select a new recipe and continue through Generate Mode without copying a source composition.
 
-- Default to one visibly saturated, opaque chromatic ink anchor. Use wording such as `fully saturated cobalt-blue risograph ink`, `opaque ultramarine cutout`, `vivid pear-green flat silhouette`, or `clean tomato-red printed block`.
-- Keep the paper, grayscale photo, microtext, and secondary marks subdued. Preserve saturation in the color anchor even when adding grain, halftone, ink bleed, or misregistration.
-- The high-chroma area should occupy roughly 0.8%-2.5% of the whole canvas or 15%-35% of the small visual cluster. It must remain visible when the image is viewed as a thumbnail.
-- Color can carry the subject itself. Prefer a colored tree, fruit, shell, flower, geometric cutout, window, poster fragment, or image panel over a gray object with one colored registration tick.
-- For a single image, use a substantial color anchor by default. For batches, at least 60% of images must use a colored subject, cutout, or block; the remaining images may use dots, hairlines, or colored type for rhythm.
-- Do not use `near-monochrome`, `no strong accent`, `pale accent`, `muted accent`, `faded accent`, or `pastel accent` unless the user explicitly requests monochrome, muted, or pastel output.
-- Do not describe the entire image as low saturation. Apply `low contrast` and `muted grayscale` only to paper, photos, and secondary ink.
-- Use only one main high-chroma hue per image. A tiny secondary hue is allowed only when it supports the subject and does not make the poster commercially colorful.
+## Variation Discipline
 
-### Standard Prompt Shape
+- Do not default repeatedly to “tiny centered photo + blue dots + microtext.”
+- When several outputs are requested, change at least the layout family, anchor structure, and typography distribution between adjacent images.
+- Use recent outputs only when they are visible in the current conversation or supplied batch. Do not claim memory of images outside the available context.
+- Preserve one visual family through paper surface, high negative space, restrained typography, print/scan reproduction, and one dominant chromatic anchor.
+- If a recipe becomes dense, remove decorative marks or secondary text before weakening the main visual metaphor.
 
-Write the final Standard Mode prompt as four compact paragraphs:
+## Output Formats
 
-1. canvas + paper + negative space + cluster size/location
-2. subject metaphor + anchor type + anchor treatment
-3. typography + accent strategy + print defects
-4. flat scan mood + avoid-list
-
-In paragraph 3, state the exact high-chroma hue, its material form, and its approximate visual share. This structure is more important than reciting every rule. Prefer a concrete, imageable prompt over a long style essay.
-
-## Variation Engine
-
-Before writing the prompt, choose one option from each axis. Randomness must change visual grammar, not only position. If recent outputs used the same layout or anchor, choose a different one.
-
-### Layout Family
-
-- **center-fragment:** tiny central image or object with surrounding air
-- **lower-left-float:** small anchor in the lower-left quadrant, lots of empty top space
-- **upper-right-block:** small color/photo block in the upper-right with loose text drift
-- **dual-panel:** two small overlapping or adjacent panels with a narrow gap
-- **irregular-cutout:** torn or organic paper shape carrying image or type
-- **type-led:** typography is the main visual anchor, image secondary or absent
-- **dot-orbit:** dots, letters, or hairline create an orbit around a small subject
-- **single-specimen:** one isolated object or mark with almost no support graphics
-
-### Image Anchor
-
-- tiny faded photo
-- torn-paper clipping
-- flat silhouette
-- solid color block
-- old printed illustration
-- object specimen
-- translucent geometric overlay
-- abstract texture window
-
-### Typography Mode
-
-- fragmented floating letters
-- short phrase pressed against image edge
-- archive microtext with date/weather
-- diagonal scattered words
-- low-contrast gray ghost text
-- headline-as-object with rough letterpress
-- text inside a color block or cutout
-- almost textless, only a tiny caption
-
-### Texture Mode
-
-- xerox softness
-- risograph grain
-- letterpress ink bleed
-- halftone degradation
-- film grain photo
-- scan noise and paper fibers
-- aged paper mottling
-- soft motion blur on selected text
-
-### Mood Mode
-
-- quiet
-- summer
-- solitude
-- childhood
-- seaside
-- afternoon
-- night
-- memory
-- slight surrealism
-
-## Workflow
-
-1. Determine mode.
-   - Use Standard Mode.
-
-2. Parse the user's content.
-   - Identify the core subject, mood, exact text if supplied, possible visual metaphor, and any reference image role.
-   - For an article or complex idea, extract one central imageable idea rather than summarizing the whole argument.
-   - If no image text is supplied, invent one short poetic English or Chinese phrase.
-
-3. Select a variation recipe.
-   - In Standard Mode, pick layout, image anchor, typography, texture, and mood from the Variation Engine, then choose color through the Standard Color Engine. Do not select `near-monochrome` unless the user explicitly asks for it.
-   - Do not default to "tiny photo + blue dots + microtext" unless it truly fits.
-   - If the recipe becomes too dense, simplify typography or color treatment first.
-
-4. Write the final image prompt.
-   - In Standard Mode, use the Standard Mode Prompt Compiler to compile the user's content into the four-paragraph prompt shape: canvas, anchor, typography/accent/print, flat-scan mood and avoid-list.
-   - Specify exact in-image text only when useful. Keep it short because image models distort long text.
-   - Make the prompt decisive: say where the anchor sits, how large it is, how text behaves, what accent appears, and how the print/scan texture looks.
-
-5. Generate the image.
-   - Use the built-in image generation capability by default.
-   - Do not stop after prompt-only unless the user explicitly asks for prompt-only.
-   - If the result obviously violates the selected mode or recipe, tighten the prompt and regenerate once.
-   - In Standard Mode, inspect the result at thumbnail scale. If the high-chroma anchor is absent, washed out, or reduced to an imperceptible mark, regenerate once with stronger color wording and a larger colored area.
-
-6. Return the image and prompt.
-
-## Negative Constraints
-
-Always avoid:
-
-- full-bleed subject or scene
-- commercial poster headline hierarchy
-- product ad layout, logo lockup, CTA, or brand campaign feeling
-- clean digital UI background
-- glossy paper mockup or heavy paper shadow
-- 3D rendering, cinematic lighting, hard shadows, depth of field, neon, cyberpunk
-- cute cartoon, kawaii illustration, anime poster, fashion editorial drama
-- too many objects, stickers, colors, captions, or decorative textures
-- high-resolution stock-photo realism
-- long, clean, perfectly readable text blocks
-
-## Output Format
+### Generate Mode
 
 ````markdown
 **生成图**
 
-![Minimal Zine Poster v0.1 style poster](absolute-image-path-or-rendered-image)
+![Minimal Zine Poster v0.3](absolute-image-path-or-rendered-image)
 
 **最终 Prompt**
 
@@ -210,35 +117,38 @@ Always avoid:
 
 **说明**
 
-- Mode: Standard
+- Mode: Generate
 - Recipe: [layout / anchor / typography / accent / texture / mood]
-- [one short note about the content interpretation]
+- Photo role: [edit target / reference image / supporting insert, omit when no photo was supplied]
+- Preservation: [high / medium + main invariants, or low + reference traits; omit when no photo was supplied]
+- [one short note about the content interpretation and any regeneration]
 ````
 
-If generated images render directly without a file path, show the image normally and still include the final prompt.
+### Reference Analysis Mode
 
-## Quality Gate
+Return:
 
-Before finalizing, check:
+- accurate style name;
+- concise Chinese summary;
+- evidence-based trait analysis;
+- fixed rules, variable rules, and sample residue;
+- reusable prompt template and randomization block;
+- negative prompt / avoid list;
+- confidence or limitations when the sample is small.
 
-- Did the run use the Standard Mode Prompt Compiler?
-- Did the run choose a variation recipe across layout, anchor, typography, accent, texture, and mood?
-- Is the structure materially different from recent visible outputs?
-- Does the image remain a sparse vertical paper poster?
-- Does 70%-90% of the poster read as paper?
-- Is the subject cluster roughly 8%-25% of the canvas?
-- Is there one clear visual metaphor rather than a whole illustrated scene?
-- Does the anchor have old-photo, clipping, print, scan, or paper-specimen treatment?
-- Are typography and microtext part of the composition?
-- Is there only one restrained accent strategy?
-- In Standard Mode, is the high-chroma anchor clearly visible at thumbnail size?
-- In Standard Mode, does saturated color occupy about 0.8%-2.5% of the canvas or 15%-35% of the visual cluster?
-- In Standard Mode, did the prompt avoid weakening the color anchor with `pale`, `muted`, `faded`, `pastel`, `low saturation`, or `near-monochrome` wording?
-- Did the prompt avoid full-bleed, commercial, 3D, neon, cinematic, cartoon, cute, brand, and generic template aesthetics?
-- Did you actually generate the image?
+### Prompt-only Mode
+
+Return the final four-paragraph prompt, selected recipe, and negative constraints. Do not imply that an image was generated.
+
+## Non-negotiable Outcome
+
+A successful generation must remain a sparse vertical paper poster with one clear visual event, not a commercial ad or a generic collage template. A successful analysis must explain what stays fixed and what can change, not merely label the references “minimalist” or “clean.”
 
 ## Example Requests
 
-- "用 $minimal-zine-poster-v0.1 做一张关于雨天的图"
-- "用 $minimal-zine-poster-v0.1 标准模式，做一张关于旧书的图"
-- "用这张照片做一张同风格 poster"
+- “用 $gc-minimal-zine-poster-v0-3 做一张关于雨天的图。”
+- “把这篇文章提炼成一个视觉隐喻，再生成海报。”
+- “分析这个文件夹里的参考图，提炼同一套视觉系统，不要复制原图文字。”
+- “参考这些图先分析，再做一张关于旧书的全新海报。”
+- “用这张人物照片做海报，保留人物身份和服装，只改变排版与纸张质感。”
+- “只给我最终生图 Prompt，不要生成图片。”
