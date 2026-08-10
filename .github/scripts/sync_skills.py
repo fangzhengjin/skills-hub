@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 from datetime import datetime, timedelta, timezone
+from html import escape
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -35,6 +36,7 @@ def _load_sources():
             raise ValueError("每个 Skill 配置必须是对象")
 
         name = source.get("name")
+        category = source.get("category")
         repository = source.get("repository")
         description = source.get("description")
         source_path = source.get("path", ".")
@@ -42,6 +44,8 @@ def _load_sources():
             raise ValueError(f"无效的 Skill 目录名：{name!r}")
         if name in names:
             raise ValueError(f"重复的 Skill 目录名：{name}")
+        if not isinstance(category, str) or not category.strip():
+            raise ValueError(f"Skill {name} 缺少分类")
         if not isinstance(repository, str) or not _is_github_repository(repository):
             raise ValueError(f"无效的 GitHub 仓库地址：{repository!r}")
         if not isinstance(description, str) or not description.strip():
@@ -53,6 +57,7 @@ def _load_sources():
         normalized.append(
             {
                 "name": name,
+                "category": category.strip(),
                 "repository": repository.rstrip("/"),
                 "path": str(Path(source_path)),
                 "description": description.strip(),
@@ -84,14 +89,30 @@ def _is_safe_source_path(source_path):
 
 
 def _load_update_times(readme):
-    header = "| Skill | 用途 | 上游仓库 | 同步时间 |"
-    if header not in readme:
+    if START_MARKER not in readme or END_MARKER not in readme:
         return {}
 
     _, marked = readme.split(START_MARKER, 1)
-    table, _ = marked.split(END_MARKER, 1)
+    catalog, _ = marked.split(END_MARKER, 1)
     update_times = {}
-    for line in table.splitlines():
+    current_name = None
+    for line in catalog.splitlines():
+        match = re.search(r'<a href="skills/([^"]+)">', line)
+        if match:
+            current_name = match.group(1)
+            continue
+
+        match = re.search(
+            r"同步时间：? ?([^<]+?)(?: · 来源：|</(?:sub|small)>)", line
+        )
+        if match and current_name:
+            updated_at = match.group(1).strip()
+            if updated_at != "—":
+                update_times[current_name] = updated_at
+            current_name = None
+            continue
+
+        # 兼容切换为 HTML 清单前的 README，避免迁移时丢失已有同步时间。
         match = re.match(r"^\| `([^`]+)` \|", line)
         if match:
             updated_at = line.rsplit("|", 2)[1].strip()
@@ -104,28 +125,41 @@ def _render_readme(readme, sources, update_times):
     if readme.count(START_MARKER) != 1 or readme.count(END_MARKER) != 1:
         raise ValueError("README.md 必须各包含一个技能清单起止标记")
 
-    rows = [
-        "| Skill | 用途 | 上游仓库 | 同步时间 |",
-        "|---|---|---|---|",
-    ]
+    categories = {}
     for source in sources:
-        repository = source["repository"]
-        link = repository[:-4] if repository.endswith(".git") else repository
-        label = urlsplit(link).path.strip("/")
-        if source["path"] != ".":
-            link = f"{link}/tree/HEAD/{source['path']}"
-            label = f"{label}/{source['path']}"
-        description = source["description"].replace("\n", " ").replace("|", "\\|")
-        updated_at = update_times.get(source["name"], "—")
-        rows.append(
-            f"| `{source['name']}` | {description} | [{label}]({link}) | "
-            f"{updated_at} |"
-        )
+        categories.setdefault(source["category"], []).append(source)
+
+    rows = []
+    for category, category_sources in categories.items():
+        if rows:
+            rows.append("")
+        rows.append(f"<h3>{escape(category)}</h3>")
+        rows.append("<ul>")
+        for source in category_sources:
+            repository = source["repository"]
+            link = repository[:-4] if repository.endswith(".git") else repository
+            label = urlsplit(link).path.strip("/")
+            if source["path"] != ".":
+                link = f"{link}/tree/HEAD/{source['path']}"
+            name = source["name"]
+            description = escape(source["description"].replace("\n", " "))
+            updated_at = escape(update_times.get(name, "—"))
+            rows.extend(
+                [
+                    "  <li>",
+                    f'    <a href="skills/{name}"><strong>{name}</strong></a><br>',
+                    f"    {description}<br>",
+                    f"    <sub>同步时间：{updated_at} · 来源："
+                    f'<a href="{escape(link, quote=True)}">{escape(label)}</a></sub>',
+                    "  </li>",
+                ]
+            )
+        rows.append("</ul>")
 
     before, marked = readme.split(START_MARKER)
     _, after = marked.split(END_MARKER)
-    table = "\n".join(rows)
-    return f"{before}{START_MARKER}\n{table}\n{END_MARKER}{after}"
+    catalog = "\n".join(rows)
+    return f"{before}{START_MARKER}\n{catalog}\n{END_MARKER}{after}"
 
 
 def _clone_sources(sources, temporary_root, current_skills):
@@ -218,6 +252,7 @@ def _self_check():
     sources = [
         {
             "name": "example-skill",
+            "category": "示例分类",
             "repository": "https://github.com/example/example-skill",
             "path": "skills/example-skill",
             "description": "示例 | 用途",
@@ -229,14 +264,26 @@ def _self_check():
     assert _is_safe_source_path("skills/example-skill")
     assert not _is_safe_source_path("../example-skill")
     assert _load_update_times(rendered) == {"example-skill": updated_at}
-    assert "示例 \\| 用途" in rendered
+    assert "<h3>示例分类</h3>" in rendered
+    assert "<ul>" in rendered
+    assert "<li>" in rendered
+    assert "<sub>" in rendered
+    assert "示例 | 用途" in rendered
     assert (
-        "| `example-skill` | 示例 \\| 用途 | "
-        "[example/example-skill/skills/example-skill]"
-        "(https://github.com/example/example-skill/tree/HEAD/skills/example-skill) | "
-        f"{updated_at} |"
+        '<a href="skills/example-skill"><strong>example-skill</strong></a>'
         in rendered
     )
+    assert (
+        f"<sub>同步时间：{updated_at} · 来源："
+        '<a href="https://github.com/example/example-skill/tree/HEAD/'
+        'skills/example-skill">example/example-skill</a></sub>'
+        in rendered
+    )
+    legacy_readme = (
+        f"{START_MARKER}\n| `example-skill` | 示例 | 上游 | {updated_at} |\n"
+        f"{END_MARKER}"
+    )
+    assert _load_update_times(legacy_readme) == {"example-skill": updated_at}
 
     fallback_sources = [
         {
