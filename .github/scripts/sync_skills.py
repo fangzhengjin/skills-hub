@@ -84,7 +84,7 @@ def _is_safe_source_path(source_path):
 
 
 def _load_update_times(readme):
-    header = "| Skill | 用途 | 上游仓库 | 最近同步时间 |"
+    header = "| Skill | 用途 | 上游仓库 | 同步时间 |"
     if header not in readme:
         return {}
 
@@ -105,7 +105,7 @@ def _render_readme(readme, sources, update_times):
         raise ValueError("README.md 必须各包含一个技能清单起止标记")
 
     rows = [
-        "| Skill | 用途 | 上游仓库 | 最近同步时间 |",
+        "| Skill | 用途 | 上游仓库 | 同步时间 |",
         "|---|---|---|---|",
     ]
     for source in sources:
@@ -224,7 +224,7 @@ def _self_check():
         }
     ]
     readme = f"before\n{START_MARKER}\nold\n{END_MARKER}\nafter\n"
-    updated_at = "2026-08-09 12:00 UTC+8"
+    updated_at = "2026-08-09 12:00"
     rendered = _render_readme(readme, sources, {"example-skill": updated_at})
     assert _is_safe_source_path("skills/example-skill")
     assert not _is_safe_source_path("../example-skill")
@@ -298,10 +298,9 @@ def _main():
         _replace_skills(staged_skills)
 
     changed_names = _find_changed_skills(successful_names)
-    names_without_time = successful_names - set(update_times)
-    if changed_names or names_without_time:
-        updated_at = datetime.now(UTC_PLUS_8).strftime("%Y-%m-%d %H:%M UTC+8")
-        for name in changed_names | names_without_time:
+    if changed_names:
+        updated_at = datetime.now(UTC_PLUS_8).strftime("%Y-%m-%d %H:%M")
+        for name in changed_names:
             update_times[name] = updated_at
 
     readme = _render_readme(previous_readme, sources, update_times)

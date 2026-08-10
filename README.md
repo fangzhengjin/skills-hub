@@ -5,15 +5,15 @@
 ## 技能清单
 
 <!-- skills:start -->
-| Skill | 用途 | 上游仓库 | 最近同步时间 |
+| Skill | 用途 | 上游仓库 | 同步时间 |
 |---|---|---|---|
-| `gc-minimal-zine-poster-v0-1` | 根据主题、语句、物件、情绪或内容简报，生成留白克制、带旧纸质感的极简 Zine 编辑海报提示词与位图图像 | [LiamGvchi/gc-minimal-zine-poster](https://github.com/LiamGvchi/gc-minimal-zine-poster) | 2026-08-10 06:33 UTC+8 |
-| `photo-abstract-editorial` | 保留上传照片原貌，并组合从照片提炼的抽象记忆面板与诗意英文标题，生成竖版编辑作品 | [ZzzLc0405/photo-abstract-editorial](https://github.com/ZzzLc0405/photo-abstract-editorial) | 2026-08-10 06:33 UTC+8 |
-| `scene-distillation-zine-v1-3` | 将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景 | [Zeejay0/gathered-scenes-zine-skill/skills/scene-distillation-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3) | — |
-| `scenes-gathered-zine-v1-3` | 保留真实摄影作为锚点，并以简化插画、结构性色彩、主动留白和手撕纤维边缘重组为竖版纸像海报 | [Zeejay0/gathered-scenes-zine-skill/skills/scenes-gathered-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scenes-gathered-zine-v1-3) | — |
-| `photo-revival` | 将普通照片或日常随手拍重新绘制成大面积白纸留白、局部鲜明色彩和微小手写文字的诗性手绘插画 | [dacnay816y62-hub/photo-revival](https://github.com/dacnay816y62-hub/photo-revival) | 2026-08-10 06:33 UTC+8 |
-| `photo-evidence-ledger` | 保留真实照片窗口，并提炼 E1 几何、E2 间隔、E3 色彩三个可追溯证据条目，生成编辑式档案海报 | [byJming/photo-skills-atelier/photo-evidence-ledger](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-evidence-ledger) | 2026-08-10 09:32 UTC+8 |
-| `photo-small-world-revival` | 聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景 | [byJming/photo-skills-atelier/photo-small-world-revival](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival) | 2026-08-10 09:32 UTC+8 |
+| `gc-minimal-zine-poster-v0-1` | 根据主题、语句、物件、情绪或内容简报，生成留白克制、带旧纸质感的极简 Zine 编辑海报提示词与位图图像 | [LiamGvchi/gc-minimal-zine-poster](https://github.com/LiamGvchi/gc-minimal-zine-poster) | 2026-08-10 06:33 |
+| `photo-abstract-editorial` | 保留上传照片原貌，并组合从照片提炼的抽象记忆面板与诗意英文标题，生成竖版编辑作品 | [ZzzLc0405/photo-abstract-editorial](https://github.com/ZzzLc0405/photo-abstract-editorial) | 2026-08-10 06:33 |
+| `scene-distillation-zine-v1-3` | 将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景 | [Zeejay0/gathered-scenes-zine-skill/skills/scene-distillation-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3) | 2026-08-09 00:35 |
+| `scenes-gathered-zine-v1-3` | 保留真实摄影作为锚点，并以简化插画、结构性色彩、主动留白和手撕纤维边缘重组为竖版纸像海报 | [Zeejay0/gathered-scenes-zine-skill/skills/scenes-gathered-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scenes-gathered-zine-v1-3) | 2026-08-09 00:35 |
+| `photo-revival` | 将普通照片或日常随手拍重新绘制成大面积白纸留白、局部鲜明色彩和微小手写文字的诗性手绘插画 | [dacnay816y62-hub/photo-revival](https://github.com/dacnay816y62-hub/photo-revival) | 2026-08-04 23:37 |
+| `photo-evidence-ledger` | 保留真实照片窗口，并提炼 E1 几何、E2 间隔、E3 色彩三个可追溯证据条目，生成编辑式档案海报 | [byJming/photo-skills-atelier/photo-evidence-ledger](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-evidence-ledger) | 2026-08-10 09:32 |
+| `photo-small-world-revival` | 聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景 | [byJming/photo-skills-atelier/photo-small-world-revival](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival) | 2026-08-10 09:32 |
 <!-- skills:end -->
 
 技能来源、目录名和用途统一维护在 `skills.json`，上表由同步脚本自动生成。各 Skill 的权利和许可仍归对应上游项目及作者所有。
@@ -22,7 +22,21 @@
 
 单个上游仓库不可用或 Skill 被删除时，同步会保留该 Skill 上次成功同步的版本，并继续处理其他来源。
 
-“最近同步时间”由同步脚本按 `UTC+8` 自动维护，仅在对应 Skill 内容成功更新时变化。
+“同步时间”由同步脚本按 `UTC+8` 自动维护，仅在对应 Skill 内容成功更新时变化。
+
+## 如何选择
+
+| 需求 | 推荐 Skill |
+|---|---|
+| 根据主题、文字或内容简报直接创作极简纸刊海报 | `gc-minimal-zine-poster-v0-1` |
+| 保留真实照片，并搭配诗性的抽象记忆面板 | `photo-abstract-editorial` |
+| 保留真实照片，并用 E1、E2、E3 整理可追溯的视觉证据 | `photo-evidence-ledger` |
+| 保留真实照片作为画面锚点，再加入纸刊插画 | `scenes-gathered-zine-v1-3` |
+| 不保留照片像素，围绕情绪、张力和隐喻重新创作 | `scene-distillation-zine-v1-3` |
+| 保留主体和整体场景氛围，进行自由的诗性手绘 | `photo-revival` |
+| 只保留一个主体、一个陪体及其关系，删去大部分场景 | `photo-small-world-revival` |
+
+在 `photo-revival` 和 `photo-small-world-revival` 之间选择时，可以先判断照片是否有明确的主体关系：有则优先选择后者，没有则选择前者。
 
 ## 使用
 
