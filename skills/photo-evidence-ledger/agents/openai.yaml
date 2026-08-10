@@ -1,0 +1,4 @@
+interface:
+  display_name: "Photo Evidence Ledger"
+  short_description: "Build a source-traceable editorial photo ledger"
+  default_prompt: "Use $photo-evidence-ledger to turn this photo into a restrained evidence-ledger editorial poster."

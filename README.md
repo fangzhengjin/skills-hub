@@ -12,6 +12,8 @@
 | `scene-distillation-zine-v1-3` | 将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景 | [Zeejay0/gathered-scenes-zine-skill/skills/scene-distillation-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3) | — |
 | `scenes-gathered-zine-v1-3` | 保留真实摄影作为锚点，并以简化插画、结构性色彩、主动留白和手撕纤维边缘重组为竖版纸像海报 | [Zeejay0/gathered-scenes-zine-skill/skills/scenes-gathered-zine-v1-3](https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scenes-gathered-zine-v1-3) | — |
 | `photo-revival` | 将普通照片或日常随手拍重新绘制成大面积白纸留白、局部鲜明色彩和微小手写文字的诗性手绘插画 | [dacnay816y62-hub/photo-revival](https://github.com/dacnay816y62-hub/photo-revival) | 2026-08-10 06:33 UTC+8 |
+| `photo-evidence-ledger` | 保留真实照片窗口，并提炼 E1 几何、E2 间隔、E3 色彩三个可追溯证据条目，生成编辑式档案海报 | [byJming/photo-skills-atelier/photo-evidence-ledger](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-evidence-ledger) | 2026-08-10 09:32 UTC+8 |
+| `photo-small-world-revival` | 聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景 | [byJming/photo-skills-atelier/photo-small-world-revival](https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival) | 2026-08-10 09:32 UTC+8 |
 <!-- skills:end -->
 
 技能来源、目录名和用途统一维护在 `skills.json`，上表由同步脚本自动生成。各 Skill 的权利和许可仍归对应上游项目及作者所有。
