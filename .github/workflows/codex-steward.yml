@@ -1,0 +1,104 @@
+name: Codex steward
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-steward-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  analyze:
+    if: >-
+      github.actor == github.repository_owner &&
+      (github.event.comment.body == '/codex' ||
+      startsWith(github.event.comment.body, '/codex '))
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    outputs:
+      result: ${{ steps.codex.outputs.final-message }}
+    steps:
+      - name: Checkout trusted workflow code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare review context
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 .github/scripts/codex_steward.py prepare
+          --event "$GITHUB_EVENT_PATH"
+          --output .codex-context
+
+      - name: Review owner instruction
+        id: codex
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          responses-api-endpoint: ${{ vars.OPENAI_BASE_URL && format('{0}/v1/responses', vars.OPENAI_BASE_URL) || '' }}
+          prompt-file: .github/codex/steward.md
+          output-schema-file: .github/codex/result.schema.json
+          permission-profile: ":read-only"
+          safety-strategy: drop-sudo
+          codex-args: '["--ephemeral"]'
+
+  execute:
+    needs: analyze
+    if: needs.analyze.outputs.result != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Save structured result
+        env:
+          CODEX_RESULT: ${{ needs.analyze.outputs.result }}
+        run: >-
+          python3 -c 'import os; from pathlib import Path;
+          Path(".codex-result.json").write_text(os.environ["CODEX_RESULT"], encoding="utf-8")'
+
+      - name: Execute authorized action
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python3 .github/scripts/codex_steward.py execute
+          --event "$GITHUB_EVENT_PATH"
+          --result .codex-result.json
+
+  report-analysis-failure:
+    needs: analyze
+    if: >-
+      always() &&
+      (needs.analyze.result == 'failure' ||
+      (needs.analyze.result == 'success' && needs.analyze.outputs.result == ''))
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Report analysis failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: >-
+          gh issue comment "$ISSUE_NUMBER"
+          --repo "$GITHUB_REPOSITORY"
+          --body "Codex 分析没有完成，请检查 OPENAI_API_KEY 和本次运行：$RUN_URL"

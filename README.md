@@ -72,6 +72,11 @@
 
 在 `photo-revival` 和 `photo-small-world-revival` 之间选择时，可以先判断照片是否有明确的主体关系：有则优先选择后者，没有则选择前者。
 
+## 收录与审查
+
+- 使用 [Skill 收录申请](../../issues/new?template=skill-request.yml) 提交上游仓库、Skill 路径、用途和依赖
+- 创建 PR、关闭申请和合并前都会再次校验目录、名称、描述、README、关联 Issue 和静态安全风险
+
 ## 同步与维护
 
 - GitHub Actions 从东八区时间 `00:00` 开始，每隔 6 小时运行一次，也支持手动触发

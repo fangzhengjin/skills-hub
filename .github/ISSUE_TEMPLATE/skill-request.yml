@@ -1,0 +1,42 @@
+name: Skill 收录申请
+description: 提交一个希望 Skills Hub 收录的上游 Skill
+title: "[Skill 收录] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请提供可公开访问的 GitHub 仓库。维护者会在 Issue 中使用 `/codex` 发起审查和后续操作。
+
+  - type: input
+    id: repository
+    attributes:
+      label: 上游仓库
+      description: Skill 所在的 GitHub 仓库根地址
+      placeholder: https://github.com/owner/repository
+    validations:
+      required: true
+
+  - type: input
+    id: path
+    attributes:
+      label: Skill 路径
+      description: 位于仓库根目录时填写 `.`
+      value: .
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 用途说明
+      description: 说明它解决什么问题，以及与现有 Skill 的主要区别
+    validations:
+      required: true
+
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 依赖与外部引用
+      description: 列出运行所需的其他 Skill、Provider、脚本、命令或服务；没有时填写“无”
+    validations:
+      required: true
