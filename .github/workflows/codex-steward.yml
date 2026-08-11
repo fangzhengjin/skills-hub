@@ -64,6 +64,8 @@ jobs:
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           responses-api-endpoint: ${{ (vars.OPENAI_BASE_URL || secrets.OPENAI_BASE_URL) && format('{0}/v1/responses', vars.OPENAI_BASE_URL || secrets.OPENAI_BASE_URL) || '' }}
+          model: ${{ vars.OPENAI_MODEL || 'gpt-5.6-luna' }}
+          effort: ${{ vars.OPENAI_REASONING_EFFORT || 'max' }}
           prompt-file: .github/codex/steward.md
           output-schema-file: .github/codex/result.schema.json
           permission-profile: ":read-only"
