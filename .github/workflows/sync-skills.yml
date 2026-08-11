@@ -33,7 +33,7 @@ jobs:
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
           GH_TOKEN: ${{ github.token }}
           SYNC_BRANCH: automation/sync-skills
-          SYNC_LABEL: codex-sync-review
+          REVIEW_LABEL: codex-review
         run: |
           set -euo pipefail
 
@@ -62,16 +62,16 @@ jobs:
             git push --force-with-lease origin "HEAD:$SYNC_BRANCH"
           fi
 
-          gh label create "$SYNC_LABEL" --repo "$GITHUB_REPOSITORY" --color "BFD4F2" --description "等待 Codex 审查的 Skill 同步" --force
+          gh label create "$REVIEW_LABEL" --repo "$GITHUB_REPOSITORY" --color "BFD4F2" --description "等待 Codex 审查的 Skill 变更" --force
           if [ -z "$existing_pr" ]; then
-            gh pr create --repo "$GITHUB_REPOSITORY" --draft --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。Codex 审查与确定性校验通过后将自动合并。"
+            gh pr create --repo "$GITHUB_REPOSITORY" --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。Codex 审查与确定性校验通过后将自动合并。"
             existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
           fi
           if [ -z "$existing_pr" ]; then
             echo "Failed to locate sync PR" >&2
             exit 1
           fi
-          gh pr edit "$existing_pr" --repo "$GITHUB_REPOSITORY" --add-label "$SYNC_LABEL"
+          gh pr edit "$existing_pr" --repo "$GITHUB_REPOSITORY" --add-label "$REVIEW_LABEL"
           echo "pr_number=$existing_pr" >> "$GITHUB_OUTPUT"
 
   analyze:

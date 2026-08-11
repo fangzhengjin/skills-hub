@@ -21,7 +21,7 @@ GITHUB_REPOSITORY_PATTERN = re.compile(
 )
 ALLOWED_PR_PATHS = {"skills.json", "README.md"}
 SYNC_BRANCH = "automation/sync-skills"
-SYNC_LABEL = "codex-sync-review"
+REVIEW_LABEL = "codex-review"
 BLOCKED_FILE_NAMES = {".env", "id_dsa", "id_ed25519", "id_rsa"}
 BLOCKED_FILE_SUFFIXES = {".key", ".p12", ".pfx"}
 BLOCKED_EXECUTABLE_SUFFIXES = {".bin", ".dll", ".dylib", ".exe", ".so"}
@@ -423,7 +423,7 @@ def _validate_candidate(candidate):
 
 
 def _create_pr(event, result):
-    """从审查结果生成配置、同步文件并创建 Draft PR。"""
+    """从审查结果生成配置、同步文件并创建 PR。"""
     if "pull_request" in event["issue"]:
         raise ValueError("请在 Issue 中创建新的收录 PR")
     candidate = _validate_candidate(result["candidate"])
@@ -474,18 +474,26 @@ def _create_pr(event, result):
 
     repository = event["repository"]["full_name"]
     body = f"{result['comment'].rstrip()}\n\n---\n\nCloses #{issue_number}"
+    _run(
+        [
+            "gh", "label", "create", REVIEW_LABEL, "--repo", repository,
+            "--color", "BFD4F2",
+            "--description", "等待 Codex 审查的 Skill 变更",
+            "--force",
+        ]
+    )
     created = _run(
         [
-            "gh", "pr", "create", "--repo", repository, "--draft",
+            "gh", "pr", "create", "--repo", repository,
             "--base", event["repository"]["default_branch"], "--head", branch,
-            "--title", title, "--body", body,
+            "--title", title, "--body", body, "--label", REVIEW_LABEL,
         ],
         capture=True,
     )
     _post_comment(
         repository,
         issue_number,
-        f"已创建 Draft PR：{created.stdout.strip()}"
+        f"已创建 PR：{created.stdout.strip()}"
         "\n\n审查详情和后续修改请在 PR 中继续。",
     )
 
@@ -542,9 +550,6 @@ def _merge_pr(event, result):
     if errors:
         raise ValueError("；".join(errors))
     _run(["python3", ".github/scripts/sync_skills.py", "--self-check"])
-    if pull["draft"]:
-        _run(["gh", "pr", "ready", str(pr_number), "--repo", repository])
-
     merged = _gh_json(
         f"repos/{repository}/pulls/{pr_number}/merge",
         method="PUT",
@@ -574,8 +579,8 @@ def _validate_sync_review(pull, repository, pr_number, result, changed_paths):
     if result.get("expected_head_sha") != head.get("sha"):
         raise ValueError("同步 PR 在审查后发生变化，请重新审查")
     labels = {label.get("name") for label in pull.get("labels", [])}
-    if SYNC_LABEL not in labels:
-        raise ValueError(f"同步 PR 缺少 {SYNC_LABEL} 标签")
+    if REVIEW_LABEL not in labels:
+        raise ValueError(f"同步 PR 缺少 {REVIEW_LABEL} 标签")
     invalid_paths = sorted(
         path
         for path in changed_paths
@@ -678,7 +683,7 @@ def self_check():
             "sha": "a" * 40,
             "repo": {"full_name": "owner/hub"},
         },
-        "labels": [{"name": SYNC_LABEL}],
+        "labels": [{"name": REVIEW_LABEL}],
     }
     sync_result = {
         "action": "merge",

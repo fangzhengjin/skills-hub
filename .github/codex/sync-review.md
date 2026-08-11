@@ -24,7 +24,27 @@
 
 - 可以合并时：`action` 为 `merge`，`recommendation` 为 `merge`
 - 需要阻止时：`action` 为 `comment`，`recommendation` 为 `request_changes`
-- `summary` 和 `comment` 使用自然、简洁的中文，`comment` 先给结论，再列出具体依据
+- `summary` 使用自然、简洁的中文
+- `comment` 使用中文 Markdown，不使用一级标题，并按以下结构输出：
+
+  ```markdown
+  ## 审查结论
+
+  一句话说明是否可以合并
+
+  ## 阻断项
+
+  - `文件路径:行号`：具体问题及风险
+
+  ## 核验结果
+
+  - 安全审查：……
+  - 变更范围：……
+  - 同步时间：……
+  ```
+
+- 没有阻断项时省略“阻断项”章节
+- 不使用连续的“标签：段落”，相同主题合并为一个无序列表项
 - `candidate` 固定为 `null`
 - `pr_number` 使用当前同步 PR 编号
 - `related_issues` 固定为空数组
