@@ -45,6 +45,17 @@ def _run(command, *, cwd=ROOT, env=None, capture=False, timeout=None, check=True
     )
 
 
+def _format_error(error):
+    """提取可公开的错误详情，并格式化为 Markdown 引用。"""
+    if isinstance(error, subprocess.CalledProcessError):
+        details = (error.stderr or error.stdout or "").strip()
+        if not details:
+            details = f"命令执行失败（退出码 {error.returncode}）"
+    else:
+        details = str(error).strip() or error.__class__.__name__
+    return "\n".join(f"> {line}" for line in details.splitlines())
+
+
 def _gh_json(endpoint, *, method="GET", fields=None):
     """调用 GitHub CLI，并返回 JSON 结果。"""
     command = ["gh", "api", endpoint]
@@ -573,7 +584,11 @@ def execute_sync_result(repository, pr_number, result_path):
         }
         _merge_pr(event, result)
     except Exception as error:
-        _post_comment(repository, pr_number, f"自动合并已停止：{error}")
+        _post_comment(
+            repository,
+            pr_number,
+            f"### 自动合并已停止\n\n{_format_error(error)}",
+        )
         raise
 
 
@@ -611,7 +626,8 @@ def execute_result(event_path, result_path):
         _post_comment(
             repository,
             number,
-            f"操作已停止：{error}\n\n修正后可以重新发送 `/codex` 指令。",
+            f"### 操作已停止\n\n{_format_error(error)}"
+            "\n\n修正后可以重新发送 `/codex` 指令。",
         )
         raise
 
@@ -624,6 +640,14 @@ def self_check():
     assert _repository_urls(
         ["候选：https://github.com/example/demo/tree/main/skill"], "owner/hub"
     ) == ["https://github.com/example/demo"]
+    command_error = subprocess.CalledProcessError(
+        1,
+        ["gh", "pr", "create", "--body", "不应公开的完整正文"],
+        stderr="GitHub 拒绝请求\n请检查仓库权限",
+    )
+    assert _format_error(command_error) == "> GitHub 拒绝请求\n> 请检查仓库权限"
+    command_error.stderr = None
+    assert _format_error(command_error) == "> 命令执行失败（退出码 1）"
     sync_pull = {
         "state": "open",
         "head": {
