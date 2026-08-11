@@ -45,6 +45,13 @@
       "repository": "https://github.com/byJming/photo-skills-atelier",
       "path": "photo-small-world-revival",
       "description": "聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景"
+    },
+    {
+      "name": "antibes-holiday",
+      "category": "插画与视觉创作",
+      "repository": "https://github.com/haorantang97/antibes-holiday",
+      "path": "plugins/antibes-holiday/skills/antibes-holiday",
+      "description": "以概念或视觉参考创作留白克制、线条松弛的黑色钢笔插画、叙事场景与标志草图"
     }
   ]
 }

@@ -29,7 +29,7 @@
   <li>
     <a href="skills/scenes-gathered-zine-v1-3"><strong>scenes-gathered-zine-v1-3</strong></a><br>
     保留真实摄影作为锚点，并以简化插画、结构性色彩、主动留白和手撕纤维边缘重组为竖版纸像海报<br>
-    <sub>同步时间：2026-08-09 00:35 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scenes-gathered-zine-v1-3">Zeejay0/gathered-scenes-zine-skill</a></sub>
+    <sub>同步时间：2026-08-11 23:46 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scenes-gathered-zine-v1-3">Zeejay0/gathered-scenes-zine-skill</a></sub>
   </li>
   <li>
     <a href="skills/photo-evidence-ledger"><strong>photo-evidence-ledger</strong></a><br>
@@ -43,7 +43,7 @@
   <li>
     <a href="skills/scene-distillation-zine-v1-3"><strong>scene-distillation-zine-v1-3</strong></a><br>
     将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景<br>
-    <sub>同步时间：2026-08-09 00:35 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3">Zeejay0/gathered-scenes-zine-skill</a></sub>
+    <sub>同步时间：2026-08-11 23:46 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3">Zeejay0/gathered-scenes-zine-skill</a></sub>
   </li>
   <li>
     <a href="skills/photo-revival"><strong>photo-revival</strong></a><br>
@@ -54,6 +54,15 @@
     <a href="skills/photo-small-world-revival"><strong>photo-small-world-revival</strong></a><br>
     聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景<br>
     <sub>同步时间：2026-08-10 09:32 · 来源：<a href="https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival">byJming/photo-skills-atelier</a></sub>
+  </li>
+</ul>
+
+<h3>插画与视觉创作</h3>
+<ul>
+  <li>
+    <a href="skills/antibes-holiday"><strong>antibes-holiday</strong></a><br>
+    以概念或视觉参考创作留白克制、线条松弛的黑色钢笔插画、叙事场景与标志草图<br>
+    <sub>同步时间：2026-08-11 23:46 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
   </li>
 </ul>
 <!-- skills:end -->
