@@ -6,7 +6,7 @@ on:
     - cron: "0 4,10,16,22 * * *"
 
 permissions:
-  contents: write
+  contents: read
 
 concurrency:
   group: sync-skills
@@ -15,22 +15,157 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      pr_number: ${{ steps.publish.outputs.pr_number }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
 
-      - name: Sync skills
-        run: python3 .github/scripts/sync_skills.py
-
-      - name: Commit changes
+      - name: Sync skills and open review PR
+        id: publish
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+          SYNC_BRANCH: automation/sync-skills
+          SYNC_LABEL: codex-sync-review
         run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
+          git fetch --no-tags origin "refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH" || true
+          if [ -n "$existing_pr" ]; then
+            git switch --create "$SYNC_BRANCH" --track "origin/$SYNC_BRANCH"
+          else
+            git switch --create "$SYNC_BRANCH"
+          fi
+
+          python3 .github/scripts/sync_skills.py
           git add -- README.md skills
           if git diff --cached --quiet; then
             echo "No skill changes"
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: sync skills"
-          git push
+          if [ -n "$existing_pr" ]; then
+            git push origin "HEAD:$SYNC_BRANCH"
+          else
+            git push --force-with-lease origin "HEAD:$SYNC_BRANCH"
+          fi
+
+          gh label create "$SYNC_LABEL" --repo "$GITHUB_REPOSITORY" --color "BFD4F2" --description "等待 Codex 审查的 Skill 同步" --force
+          if [ -z "$existing_pr" ]; then
+            gh pr create --repo "$GITHUB_REPOSITORY" --draft --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。Codex 审查与确定性校验通过后将自动合并。"
+            existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
+          fi
+          if [ -z "$existing_pr" ]; then
+            echo "Failed to locate sync PR" >&2
+            exit 1
+          fi
+          gh pr edit "$existing_pr" --repo "$GITHUB_REPOSITORY" --add-label "$SYNC_LABEL"
+          echo "pr_number=$existing_pr" >> "$GITHUB_OUTPUT"
+
+  analyze:
+    needs: sync
+    if: needs.sync.outputs.pr_number != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    outputs:
+      result: ${{ steps.codex.outputs.final-message }}
+    steps:
+      - name: Checkout trusted workflow code
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare sync review context
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.sync.outputs.pr_number }}
+        run: >-
+          python3 .github/scripts/codex_steward.py prepare-sync
+          --repository "$GITHUB_REPOSITORY"
+          --pr "$PR_NUMBER"
+          --output .codex-context
+
+      - name: Review synchronized skills
+        id: codex
+        uses: openai/codex-action@52fe01ec70a42f454c9d2ebd47598f9fd6893d56 # v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          responses-api-endpoint: ${{ (vars.OPENAI_BASE_URL || secrets.OPENAI_BASE_URL) && format('{0}/v1/responses', vars.OPENAI_BASE_URL || secrets.OPENAI_BASE_URL) || '' }}
+          model: ${{ vars.OPENAI_MODEL || 'gpt-5.6-luna' }}
+          effort: ${{ vars.OPENAI_REASONING_EFFORT || 'max' }}
+          prompt-file: .github/codex/sync-review.md
+          output-schema-file: .github/codex/result.schema.json
+          permission-profile: ":read-only"
+          safety-strategy: drop-sudo
+          codex-args: '["--ephemeral"]'
+
+  execute:
+    needs: [sync, analyze]
+    if: needs.analyze.outputs.result != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout default branch
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          fetch-depth: 0
+
+      - name: Save structured result
+        env:
+          CODEX_RESULT: ${{ needs.analyze.outputs.result }}
+        run: >-
+          python3 -c 'import os; from pathlib import Path;
+          Path(".codex-result.json").write_text(os.environ["CODEX_RESULT"], encoding="utf-8")'
+
+      - name: Apply sync review result
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.sync.outputs.pr_number }}
+        run: >-
+          python3 .github/scripts/codex_steward.py execute-sync
+          --repository "$GITHUB_REPOSITORY"
+          --pr "$PR_NUMBER"
+          --result .codex-result.json
+
+  report-analysis-failure:
+    needs: [sync, analyze]
+    if: >-
+      always() &&
+      needs.sync.outputs.pr_number != '' &&
+      (needs.analyze.result == 'failure' ||
+      (needs.analyze.result == 'success' && needs.analyze.outputs.result == ''))
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+    steps:
+      - name: Report analysis failure
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ needs.sync.outputs.pr_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: >-
+          gh pr comment "$PR_NUMBER"
+          --repo "$GITHUB_REPOSITORY"
+          --body "Codex 自动审查没有完成，请检查 OPENAI_API_KEY 和本次运行：$RUN_URL"

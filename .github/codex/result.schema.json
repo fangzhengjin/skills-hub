@@ -10,7 +10,6 @@
     "candidate",
     "pr_number",
     "related_issues",
-    "close_issues",
     "expected_head_sha"
   ],
   "properties": {
@@ -62,13 +61,6 @@
     "related_issues": {
       "type": "array",
       "items": {"type": "integer", "minimum": 1},
-      "uniqueItems": true,
-      "maxItems": 20
-    },
-    "close_issues": {
-      "type": "array",
-      "items": {"type": "integer", "minimum": 1},
-      "uniqueItems": true,
       "maxItems": 20
     },
     "expected_head_sha": {

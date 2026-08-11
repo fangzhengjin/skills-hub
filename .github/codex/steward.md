@@ -49,6 +49,5 @@ README 和 `skills/` 由现有同步脚本生成，不要提出手工维护另�
 - `comment` 使用自然、简洁的中文，先给结论，再列阻断项、建议和关联项
 - 需要 Owner 决定时，最后明确写出可以回复的 `/codex ...` 示例
 - `related_issues` 列出有关联但不一定关闭的 Issue
-- `close_issues` 只列出随合并应关闭的同一收录事项
 - 审查 PR 时把当前 `head.sha` 原样写入 `expected_head_sha`
 - 不确定字段使用 `null` 或空数组，不得编造仓库、路径、Issue、PR 或提交 SHA
