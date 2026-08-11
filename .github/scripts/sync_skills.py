@@ -248,6 +248,19 @@ def _replace_skills(staged_skills):
     staged_skills.replace(SKILLS_PATH)
 
 
+def _replace_selected_skills(staged_skills, sources, current_skills):
+    """只替换指定 Skill，保留当前目录中的其他内容。"""
+    current_skills.mkdir(parents=True, exist_ok=True)
+    for source in sources:
+        staged_path = staged_skills / source["name"]
+        if not staged_path.exists():
+            continue
+        target_path = current_skills / source["name"]
+        if target_path.exists():
+            shutil.rmtree(target_path)
+        staged_path.replace(target_path)
+
+
 def _self_check():
     sources = [
         {
@@ -330,19 +343,45 @@ def _self_check():
             encoding="utf-8"
         ) == "updated"
         assert successful_names == {"updated-skill"}
+
+        selected_staging = root / "selected"
+        selected_skill = selected_staging / "new-skill"
+        selected_skill.mkdir(parents=True)
+        (selected_skill / "SKILL.md").write_text("new", encoding="utf-8")
+        _replace_selected_skills(
+            selected_staging,
+            [{"name": "new-skill"}],
+            current_skills,
+        )
+        assert (current_skills / "new-skill" / "SKILL.md").read_text(
+            encoding="utf-8"
+        ) == "new"
+        assert (current_skills / "removed-skill" / "SKILL.md").read_text(
+            encoding="utf-8"
+        ) == "previous"
     print("self-check passed")
 
 
-def _main():
+def _main(skill_name=None):
     sources = _load_sources()
+    selected_sources = sources
+    if skill_name:
+        selected_sources = [
+            source for source in sources if source["name"] == skill_name
+        ]
+        if not selected_sources:
+            raise ValueError(f"skills.json 中不存在 Skill：{skill_name}")
     previous_readme = README_PATH.read_text(encoding="utf-8")
     update_times = _load_update_times(previous_readme)
 
     with tempfile.TemporaryDirectory(prefix=".skills-sync-", dir=ROOT) as directory:
         staged_skills, successful_names = _clone_sources(
-            sources, Path(directory), SKILLS_PATH
+            selected_sources, Path(directory), SKILLS_PATH
         )
-        _replace_skills(staged_skills)
+        if skill_name:
+            _replace_selected_skills(staged_skills, selected_sources, SKILLS_PATH)
+        else:
+            _replace_skills(staged_skills)
 
     changed_names = _find_changed_skills(successful_names)
     if changed_names:
@@ -357,7 +396,9 @@ def _main():
 if __name__ == "__main__":
     if sys.argv[1:] == ["--self-check"]:
         _self_check()
+    elif len(sys.argv) == 3 and sys.argv[1] == "--skill":
+        _main(sys.argv[2])
     elif sys.argv[1:]:
-        raise SystemExit("用法：sync_skills.py [--self-check]")
+        raise SystemExit("用法：sync_skills.py [--self-check | --skill NAME]")
     else:
         _main()

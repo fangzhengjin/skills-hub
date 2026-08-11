@@ -438,33 +438,56 @@ def _create_pr(event, result):
     safe_env = os.environ.copy()
     safe_env.pop("GH_TOKEN", None)
     safe_env.pop("GITHUB_TOKEN", None)
-    _run(["python3", ".github/scripts/sync_skills.py"], env=safe_env)
+    _run(
+        [
+            "python3",
+            ".github/scripts/sync_skills.py",
+            "--skill",
+            candidate["name"],
+        ],
+        env=safe_env,
+    )
     errors = validate_catalog(ROOT)
     if errors:
         raise ValueError("；".join(errors))
 
     issue_number = event["issue"]["number"]
+    title = f"feat(skills): 收录 {candidate['name']}"
     branch = f"codex/issue-{issue_number}-{os.environ['GITHUB_RUN_ID']}"
     _run(["git", "switch", "-c", branch])
-    _run(["git", "add", "--", "skills.json", "README.md", "skills"])
+    _run(
+        [
+            "git",
+            "add",
+            "--",
+            "skills.json",
+            "README.md",
+            f"skills/{candidate['name']}",
+        ]
+    )
     if _run(["git", "diff", "--cached", "--quiet"], check=False).returncode == 0:
         raise ValueError("没有可提交的收录变更")
     _run(["git", "config", "user.name", "github-actions[bot]"])
     _run(["git", "config", "user.email", "41898282+github-actions[bot]@users.noreply.github.com"])
-    _run(["git", "commit", "-m", f"feat(catalog): 收录 {candidate['name']}"])
+    _run(["git", "commit", "-m", title])
     _run(["git", "push", "origin", branch])
 
     repository = event["repository"]["full_name"]
-    body = f"{result['comment']}\n\nCloses #{issue_number}"
+    body = f"{result['comment'].rstrip()}\n\n---\n\nCloses #{issue_number}"
     created = _run(
         [
             "gh", "pr", "create", "--repo", repository, "--draft",
             "--base", event["repository"]["default_branch"], "--head", branch,
-            "--title", f"收录 {candidate['name']}", "--body", body,
+            "--title", title, "--body", body,
         ],
         capture=True,
     )
-    _post_comment(repository, issue_number, f"{result['comment']}\n\n已创建 Draft PR：{created.stdout.strip()}")
+    _post_comment(
+        repository,
+        issue_number,
+        f"已创建 Draft PR：{created.stdout.strip()}"
+        "\n\n审查详情和后续修改请在 PR 中继续。",
+    )
 
 
 def _merge_pr(event, result):
