@@ -76,6 +76,18 @@ def _gh_json(endpoint, *, method="GET", fields=None):
     return json.loads(result.stdout) if result.stdout.strip() else None
 
 
+def _pull_files(repository, pr_number):
+    """分页读取 PR 的全部变更文件。"""
+    result = _run(
+        [
+            "gh", "api", "--paginate", "--slurp",
+            f"repos/{repository}/pulls/{pr_number}/files?per_page=100",
+        ],
+        capture=True,
+    )
+    return [item for page in json.loads(result.stdout) for item in page]
+
+
 def _publish_review_status(repository, sha):
     """为已完成确定性校验的 PR Head 发布合并门禁状态。"""
     _gh_json(
@@ -145,7 +157,122 @@ def _review_checkout_matches(checkout_sha, api_sha, expected_sha):
     return checkout_sha == api_sha and checkout_sha == expected_sha
 
 
-def _update_pull_branch(repository, pr_number, pull):
+def _collection_candidate(base_config, head_config, changed_paths):
+    """提取收录 PR 唯一新增的 Skill 配置，并拒绝改写既有配置。"""
+    base_sources = {item["name"]: item for item in base_config["skills"]}
+    head_sources = {item["name"]: item for item in head_config["skills"]}
+    changed_names = {
+        name for name in base_sources.keys() & head_sources.keys()
+        if base_sources[name] != head_sources[name]
+    }
+    removed_names = base_sources.keys() - head_sources.keys()
+    added_names = head_sources.keys() - base_sources.keys()
+    if changed_names or removed_names or len(added_names) != 1:
+        raise ValueError("收录 PR 必须且只能新增一个 Skill 配置")
+
+    name = next(iter(added_names))
+    allowed_paths = {"README.md", "skills.json"}
+    invalid_paths = sorted(
+        path for path in changed_paths
+        if path not in allowed_paths and not path.startswith(f"skills/{name}/")
+    )
+    if invalid_paths:
+        raise ValueError(f"收录 PR 包含其他 Skill 变更：{', '.join(invalid_paths)}")
+    return head_sources[name]
+
+
+def _rebuild_collection_tree(checkout, previous_sha, merge_base_sha, changed_paths):
+    """以最新默认分支为底，按原配置重新同步待收录 Skill。"""
+    base_config = json.loads(
+        _run(["git", "show", f"{merge_base_sha}:skills.json"], capture=True).stdout
+    )
+    head_config = json.loads(
+        _run(["git", "show", f"{previous_sha}:skills.json"], capture=True).stdout
+    )
+    candidate = _collection_candidate(base_config, head_config, changed_paths)
+    current_config_path = checkout / "skills.json"
+    current_config = json.loads(current_config_path.read_text(encoding="utf-8"))
+    if any(item["name"] == candidate["name"] for item in current_config["skills"]):
+        raise ValueError(f"最新默认分支已包含 {candidate['name']}")
+
+    current_config["skills"].append(candidate)
+    current_config_path.write_text(
+        json.dumps(current_config, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    sync = _load_sync_module(checkout)
+    sync._main(candidate["name"])
+
+    errors = validate_catalog(checkout)
+    if errors:
+        raise ValueError("；".join(errors))
+    return candidate["name"]
+
+
+def _rebuild_collection_branch(repository, pr_number, pull):
+    """在更新分支发生内容冲突时重建受控收录分支。"""
+    branch = pull["head"]["ref"]
+    if not COLLECTION_BRANCH_PATTERN.fullmatch(branch):
+        raise ValueError("只有受控收录分支可以自动重建冲突")
+
+    previous_sha = pull["head"]["sha"]
+    default_sha = _gh_json(
+        f"repos/{repository}/branches/{pull['base']['ref']}"
+    )["commit"]["sha"]
+    files = _pull_files(repository, pr_number)
+    changed_paths = {item["filename"] for item in files}
+    _run([
+        "git", "fetch", "--no-tags", "origin",
+        f"refs/pull/{pr_number}/head", f"refs/heads/{pull['base']['ref']}",
+    ])
+    merge_base_sha = _run(
+        ["git", "merge-base", previous_sha, default_sha], capture=True
+    ).stdout.strip()
+
+    with tempfile.TemporaryDirectory(prefix="codex-rebuild-") as directory:
+        checkout = Path(directory) / "checkout"
+        _run(["git", "worktree", "add", "--detach", str(checkout), default_sha])
+        try:
+            name = _rebuild_collection_tree(
+                checkout, previous_sha, merge_base_sha, changed_paths
+            )
+            _run(
+                ["git", "add", "--", "skills.json", "README.md", f"skills/{name}"],
+                cwd=checkout,
+            )
+            _run(
+                [
+                    "git", "-c", "user.name=github-actions[bot]",
+                    "-c", "user.email=41898282+github-actions[bot]@users.noreply.github.com",
+                    "commit", "-m", f"feat(skills): 收录 {name}",
+                ],
+                cwd=checkout,
+            )
+            rebuilt_sha = _run(
+                ["git", "rev-parse", "HEAD"], cwd=checkout, capture=True
+            ).stdout.strip()
+            _run(
+                [
+                    "git", "push",
+                    f"--force-with-lease=refs/heads/{branch}:{previous_sha}",
+                    "origin", f"HEAD:refs/heads/{branch}",
+                ],
+                cwd=checkout,
+            )
+        finally:
+            _run(["git", "worktree", "remove", "--force", str(checkout)])
+
+    for _ in range(30):
+        current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
+        if current["head"]["sha"] == rebuilt_sha:
+            return current
+        if current["head"]["sha"] != previous_sha:
+            raise ValueError("PR 在自动重建期间发生变化，请重新审查")
+        time.sleep(2)
+    raise TimeoutError("等待 GitHub 更新重建后的 PR 分支超时")
+
+
+def _update_pull_branch(repository, pr_number, pull, *, rebuild_conflicts=False):
     """必要时把最新默认分支合入受控 PR，并等待 GitHub 完成更新。"""
     if not _pull_is_behind_default(repository, pull):
         return pull
@@ -153,12 +280,23 @@ def _update_pull_branch(repository, pr_number, pull):
     if head_repository != repository:
         raise ValueError("PR 已落后默认分支，且源分支不在本仓库，无法自动更新")
 
+    if pull.get("mergeable_state") == "dirty":
+        if rebuild_conflicts:
+            return _rebuild_collection_branch(repository, pr_number, pull)
+        raise ValueError("PR 与最新默认分支冲突，请重新审查")
+
     previous_sha = pull["head"]["sha"]
-    _gh_json(
-        f"repos/{repository}/pulls/{pr_number}/update-branch",
-        method="PUT",
-        fields={"expected_head_sha": previous_sha},
-    )
+    try:
+        _gh_json(
+            f"repos/{repository}/pulls/{pr_number}/update-branch",
+            method="PUT",
+            fields={"expected_head_sha": previous_sha},
+        )
+    except subprocess.CalledProcessError:
+        current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
+        if rebuild_conflicts and current.get("mergeable_state") == "dirty":
+            return _rebuild_collection_branch(repository, pr_number, current)
+        raise
     for _ in range(30):
         current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
         if current["head"]["sha"] != previous_sha:
@@ -186,9 +324,7 @@ def _update_pull_branch(repository, pr_number, pull):
 
 def _validate_merge_candidate(repository, pr_number, pull):
     """对更新到最新基线的 PR 执行确定性目录与上游校验。"""
-    if pull["changed_files"] > 100:
-        raise ValueError("收录 PR 修改文件超过 100 个，请拆分后重新审查")
-    files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
+    files = _pull_files(repository, pr_number)
     changed_paths = {item["filename"] for item in files}
     invalid_paths = sorted(
         path for path in changed_paths
@@ -505,9 +641,7 @@ def prepare_context(event_path, output_directory, expected_head_sha=None):
     pull_files = []
     if "pull_request" in issue:
         pull_request = _gh_json(f"repos/{repository}/pulls/{issue_number}")
-        pull_files = _gh_json(
-            f"repos/{repository}/pulls/{issue_number}/files?per_page=100"
-        )
+        pull_files = _pull_files(repository, issue_number)
         _run(["git", "fetch", "--no-tags", "origin", f"refs/pull/{issue_number}/head"])
         checkout_sha = _run(
             ["git", "rev-parse", "FETCH_HEAD"], capture=True
@@ -784,8 +918,6 @@ def _validate_automated_review(
         raise ValueError("PR 必须处于开放状态")
     if pull.get("base", {}).get("ref") != default_branch:
         raise ValueError("PR 必须合并到默认分支")
-    if pull.get("changed_files", 0) > 100:
-        raise ValueError("PR 修改文件超过 100 个，请人工审查")
     if pull.get("user", {}).get("login") != "github-actions[bot]":
         raise ValueError("只能自动审查 GitHub Actions 创建的 PR")
     head = pull.get("head") or {}
@@ -823,7 +955,7 @@ def update_review_branch(repository, pr_number, github_output=None):
         repository_data = _gh_json(f"repos/{repository}")
         owner = repository_data["owner"]["login"]
         pull = _gh_json(f"repos/{repository}/pulls/{pr_number}")
-        files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
+        files = _pull_files(repository, pr_number)
         result = {
             "action": "merge",
             "recommendation": "merge",
@@ -838,7 +970,9 @@ def update_review_branch(repository, pr_number, github_output=None):
             result,
             {item["filename"] for item in files},
         )
-        pull = _update_pull_branch(repository, pr_number, pull)
+        pull = _update_pull_branch(
+            repository, pr_number, pull, rebuild_conflicts=True
+        )
         if github_output is not None:
             with github_output.open("a", encoding="utf-8") as file:
                 file.write(f"head_sha={pull['head']['sha']}\n")
@@ -862,7 +996,7 @@ def execute_review_result(repository, pr_number, result_path):
         repository_data = _gh_json(f"repos/{repository}")
         owner = repository_data["owner"]["login"]
         pull = _gh_json(f"repos/{repository}/pulls/{pr_number}")
-        files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
+        files = _pull_files(repository, pr_number)
         changed_paths = {item["filename"] for item in files}
         _validate_automated_review(
             pull,
@@ -958,6 +1092,23 @@ def self_check():
     assert _format_error(command_error) == "> GitHub 拒绝请求\n> 请检查仓库权限"
     command_error.stderr = None
     assert _format_error(command_error) == "> 命令执行失败（退出码 1）"
+    base_config = {"skills": [{"name": "existing", "path": "."}]}
+    candidate = {"name": "new-skill", "path": "."}
+    assert _collection_candidate(
+        base_config,
+        {"skills": [*base_config["skills"], candidate]},
+        {"skills.json", "README.md", "skills/new-skill/SKILL.md"},
+    ) == candidate
+    try:
+        _collection_candidate(
+            base_config,
+            {"skills": [*base_config["skills"], candidate]},
+            {"skills.json", "skills/existing/SKILL.md"},
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("冲突重建不得带入其他 Skill 变更")
     assert not _branch_delete_failed(0, "")
     assert not _branch_delete_failed(1, "Reference does not exist")
     assert _branch_delete_failed(1, "GitHub API unavailable")
