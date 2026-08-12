@@ -72,20 +72,6 @@
 </ul>
 <!-- skills:end -->
 
-## 如何选择
-
-| 需求 | 推荐 Skill |
-|---|---|
-| 根据主题、文字或内容简报直接创作极简纸刊海报 | `gc-minimal-zine-poster-v0-1` |
-| 保留真实照片，并搭配诗性的抽象记忆面板 | `photo-abstract-editorial` |
-| 保留真实照片，并用 E1、E2、E3 整理可追溯的视觉证据 | `photo-evidence-ledger` |
-| 保留真实照片作为画面锚点，再加入纸刊插画 | `scenes-gathered-zine-v1-3` |
-| 不保留照片像素，围绕情绪、张力和隐喻重新创作 | `scene-distillation-zine-v1-3` |
-| 保留主体和整体场景氛围，进行自由的诗性手绘 | `photo-revival` |
-| 只保留一个主体、一个陪体及其关系，删去大部分场景 | `photo-small-world-revival` |
-
-在 `photo-revival` 和 `photo-small-world-revival` 之间选择时，可以先判断照片是否有明确的主体关系：有则优先选择后者，没有则选择前者。
-
 ## 收录与审查
 
 - 使用 [Skill 收录申请](../../issues/new?template=skill-request.yml) 提交上游仓库、Skill 路径、用途和依赖

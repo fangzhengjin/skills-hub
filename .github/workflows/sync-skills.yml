@@ -37,12 +37,19 @@ jobs:
           set -euo pipefail
 
           existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
-          git fetch --no-tags origin "refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH" || true
           if [ -n "$existing_pr" ]; then
-            git switch --create "$SYNC_BRANCH" --track "origin/$SYNC_BRANCH"
-          else
-            git switch --create "$SYNC_BRANCH"
+            pr_url="$(gh pr view "$existing_pr" --repo "$GITHUB_REPOSITORY" --json url --jq '.url')"
+            echo "同步已跳过：等待 PR #$existing_pr 处理完成"
+            {
+              echo "### 同步已暂停"
+              echo ""
+              echo "存在尚未处理的同步 PR：[$existing_pr]($pr_url)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
+
+          git fetch --no-tags origin "refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH" || true
+          git switch --create "$SYNC_BRANCH"
 
           python3 .github/scripts/sync_skills.py
           git add -- README.md skills
@@ -54,17 +61,11 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -m "chore: sync skills"
-          if [ -n "$existing_pr" ]; then
-            git push origin "HEAD:$SYNC_BRANCH"
-          else
-            git push --force-with-lease origin "HEAD:$SYNC_BRANCH"
-          fi
+          git push --force-with-lease origin "HEAD:$SYNC_BRANCH"
 
           gh label create "$REVIEW_LABEL" --repo "$GITHUB_REPOSITORY" --color "BFD4F2" --description "等待 Codex 审查的 Skill 变更" --force
-          if [ -z "$existing_pr" ]; then
-            gh pr create --repo "$GITHUB_REPOSITORY" --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。Codex 审查与确定性校验通过后将自动合并。"
-            existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
-          fi
+          gh pr create --repo "$GITHUB_REPOSITORY" --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。Codex 审查与确定性校验通过后将自动合并。"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
           if [ -z "$existing_pr" ]; then
             echo "Failed to locate sync PR" >&2
             exit 1

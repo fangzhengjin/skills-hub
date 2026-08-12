@@ -21,7 +21,7 @@ GITHUB_REPOSITORY_PATTERN = re.compile(
 )
 ALLOWED_PR_PATHS = {"skills.json", "README.md"}
 SYNC_BRANCH = "automation/sync-skills"
-COLLECTION_BRANCH_PATTERN = re.compile(r"^codex/issue-\d+-\d+$")
+COLLECTION_BRANCH_PATTERN = re.compile(r"^codex/issue-(\d+)-\d+$")
 REVIEW_LABEL = "codex-review"
 BLOCKED_FILE_NAMES = {".env", "id_dsa", "id_ed25519", "id_rsa"}
 BLOCKED_FILE_SUFFIXES = {".key", ".p12", ".pfx"}
@@ -75,6 +75,28 @@ def _gh_json(endpoint, *, method="GET", fields=None):
     return json.loads(result.stdout) if result.stdout.strip() else None
 
 
+def _delete_branch_if_exists(repository, branch):
+    """删除远端分支；GitHub 已自动删除时保持幂等。"""
+    command = [
+        "gh", "api", f"repos/{repository}/git/refs/heads/{branch}",
+        "--method", "DELETE",
+    ]
+    result = _run(command, capture=True, check=False)
+    details = f"{result.stdout}\n{result.stderr}"
+    if _branch_delete_failed(result.returncode, details):
+        raise subprocess.CalledProcessError(
+            result.returncode,
+            command,
+            output=result.stdout,
+            stderr=result.stderr,
+        )
+
+
+def _branch_delete_failed(returncode, details):
+    """判断远端分支删除结果是否需要中止合并收尾。"""
+    return returncode != 0 and "Reference does not exist" not in details
+
+
 def _load_sync_module(root):
     """加载现有同步脚本，并把路径绑定到待验证仓库。"""
     script_path = ROOT / ".github/scripts/sync_skills.py"
@@ -86,6 +108,17 @@ def _load_sync_module(root):
     module.README_PATH = root / "README.md"
     module.SKILLS_PATH = root / "skills"
     return module
+
+
+def _merge_cleanup_target(repository, pull):
+    """返回 Codex 合并后可删除的本仓库分支及其收录 Issue。"""
+    branch = pull["head"]["ref"]
+    head_repository = (pull["head"].get("repo") or {}).get("full_name")
+    if head_repository != repository or branch == pull["base"]["ref"]:
+        return None
+    collection = COLLECTION_BRANCH_PATTERN.fullmatch(branch)
+    issue_number = int(collection.group(1)) if collection else None
+    return branch, issue_number
 
 
 def _inside(path, root):
@@ -573,7 +606,31 @@ def _merge_pr(event, result):
     )
     if not merged.get("merged"):
         raise ValueError(merged.get("message", "GitHub 拒绝合并"))
+
+    cleanup = _merge_cleanup_target(repository, pull)
+    cleanup_errors = []
+    if cleanup:
+        branch, issue_number = cleanup
+        if issue_number is not None:
+            try:
+                _gh_json(
+                    f"repos/{repository}/issues/{issue_number}",
+                    method="PATCH",
+                    fields={"state": "closed", "state_reason": "completed"},
+                )
+            except Exception as error:
+                cleanup_errors.append(f"关闭 Issue #{issue_number} 失败：{error}")
+        try:
+            _delete_branch_if_exists(repository, branch)
+        except Exception as error:
+            cleanup_errors.append(f"删除分支 `{branch}` 失败：{error}")
     _post_comment(repository, event["issue"]["number"], result["comment"])
+    if cleanup_errors:
+        _post_comment(
+            repository,
+            event["issue"]["number"],
+            "### 合并后收尾未完成\n\n- " + "\n- ".join(cleanup_errors),
+        )
 
 
 def _validate_automated_review(
@@ -728,6 +785,9 @@ def self_check():
     assert _format_error(command_error) == "> GitHub 拒绝请求\n> 请检查仓库权限"
     command_error.stderr = None
     assert _format_error(command_error) == "> 命令执行失败（退出码 1）"
+    assert not _branch_delete_failed(0, "")
+    assert not _branch_delete_failed(1, "Reference does not exist")
+    assert _branch_delete_failed(1, "GitHub API unavailable")
     sync_pull = {
         "state": "open",
         "base": {"ref": "main"},
@@ -756,6 +816,13 @@ def self_check():
     )
     collection_pull = json.loads(json.dumps(sync_pull))
     collection_pull["head"]["ref"] = "codex/issue-3-123"
+    assert _merge_cleanup_target("owner/hub", collection_pull) == (
+        "codex/issue-3-123", 3
+    )
+    assert _merge_cleanup_target("owner/hub", sync_pull) == (SYNC_BRANCH, None)
+    fork_pull = json.loads(json.dumps(collection_pull))
+    fork_pull["head"]["repo"]["full_name"] = "contributor/hub"
+    assert _merge_cleanup_target("owner/hub", fork_pull) is None
     _validate_automated_review(
         collection_pull,
         "owner/hub",
