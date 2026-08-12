@@ -56,6 +56,15 @@
     <sub>同步时间：2026-08-10 09:32 · 来源：<a href="https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival">byJming/photo-skills-atelier</a></sub>
   </li>
 </ul>
+
+<h3>插画与视觉创作</h3>
+<ul>
+  <li>
+    <a href="skills/antibes-holiday"><strong>antibes-holiday</strong></a><br>
+    根据概念或视觉参考生成松弛黑色钢笔插画、叙事场景与标志探索<br>
+    <sub>同步时间：2026-08-12 13:25 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
+  </li>
+</ul>
 <!-- skills:end -->
 
 ## 如何选择
