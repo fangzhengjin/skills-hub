@@ -19,7 +19,7 @@ concurrency:
 jobs:
   analyze:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 60
     permissions:
       contents: read
       issues: read
@@ -97,6 +97,7 @@ jobs:
     if: >-
       always() &&
       (needs.analyze.result == 'failure' ||
+      needs.analyze.result == 'cancelled' ||
       (needs.analyze.result == 'success' && needs.analyze.outputs.result == ''))
     runs-on: ubuntu-latest
     permissions:

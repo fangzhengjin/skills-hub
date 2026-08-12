@@ -10,6 +10,7 @@ import re
 import shutil
 import subprocess
 import tempfile
+import time
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -95,6 +96,119 @@ def _delete_branch_if_exists(repository, branch):
 def _branch_delete_failed(returncode, details):
     """判断远端分支删除结果是否需要中止合并收尾。"""
     return returncode != 0 and "Reference does not exist" not in details
+
+
+def _pull_is_behind_default(repository, pull):
+    """判断 PR 源分支是否缺少默认分支的最新提交。"""
+    default_sha = _gh_json(
+        f"repos/{repository}/branches/{pull['base']['ref']}"
+    )["commit"]["sha"]
+    comparison = _gh_json(
+        f"repos/{repository}/compare/{default_sha}...{pull['head']['sha']}"
+    )
+    return comparison["behind_by"] > 0
+
+
+def _updated_head_is_base_merge(previous_sha, parent_shas, base_parent_behind):
+    """确认更新提交只合并了原审查提交和默认分支历史。"""
+    return (
+        len(parent_shas) == 2
+        and previous_sha in parent_shas
+        and base_parent_behind == 0
+    )
+
+
+def _update_pull_branch(repository, pr_number, pull):
+    """必要时把最新默认分支合入受控 PR，并等待 GitHub 完成更新。"""
+    if not _pull_is_behind_default(repository, pull):
+        return pull
+    head_repository = (pull["head"].get("repo") or {}).get("full_name")
+    if head_repository != repository:
+        raise ValueError("PR 已落后默认分支，且源分支不在本仓库，无法自动更新")
+
+    previous_sha = pull["head"]["sha"]
+    _gh_json(
+        f"repos/{repository}/pulls/{pr_number}/update-branch",
+        method="PUT",
+        fields={"expected_head_sha": previous_sha},
+    )
+    for _ in range(30):
+        current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
+        if current["head"]["sha"] != previous_sha:
+            commit = _gh_json(
+                f"repos/{repository}/git/commits/{current['head']['sha']}"
+            )
+            parents = [parent["sha"] for parent in commit["parents"]]
+            base_parents = [sha for sha in parents if sha != previous_sha]
+            base_parent_behind = 1
+            if len(base_parents) == 1:
+                default_sha = _gh_json(
+                    f"repos/{repository}/branches/{pull['base']['ref']}"
+                )["commit"]["sha"]
+                base_parent_behind = _gh_json(
+                    f"repos/{repository}/compare/{base_parents[0]}...{default_sha}"
+                )["behind_by"]
+            if not _updated_head_is_base_merge(
+                previous_sha, parents, base_parent_behind
+            ):
+                raise ValueError("PR 更新后包含非默认分支内容，请重新审查")
+            return current
+        time.sleep(2)
+    raise TimeoutError("等待 GitHub 更新 PR 分支超时")
+
+
+def _validate_merge_candidate(repository, pr_number, pull):
+    """对更新到最新基线的 PR 执行确定性目录与上游校验。"""
+    if pull["changed_files"] > 100:
+        raise ValueError("收录 PR 修改文件超过 100 个，请拆分后重新审查")
+    files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
+    changed_paths = {item["filename"] for item in files}
+    invalid_paths = sorted(
+        path for path in changed_paths
+        if path not in ALLOWED_PR_PATHS and not path.startswith("skills/")
+    )
+    if invalid_paths:
+        raise ValueError(f"收录 PR 包含越界文件：{', '.join(invalid_paths)}")
+
+    base_sha = _gh_json(
+        f"repos/{repository}/branches/{pull['base']['ref']}"
+    )["commit"]["sha"]
+    _run([
+        "git", "fetch", "--no-tags", "origin",
+        f"refs/pull/{pr_number}/head", f"refs/heads/{pull['base']['ref']}",
+    ])
+    with tempfile.TemporaryDirectory(prefix="codex-pr-") as directory:
+        checkout = Path(directory) / "checkout"
+        _run([
+            "git", "worktree", "add", "--detach", str(checkout),
+            pull["head"]["sha"],
+        ])
+        try:
+            errors = validate_catalog(checkout)
+            base_config = json.loads(
+                _run(
+                    ["git", "show", f"{base_sha}:skills.json"],
+                    capture=True,
+                ).stdout
+            )
+            head_config = json.loads((checkout / "skills.json").read_text(encoding="utf-8"))
+            base_sources = {item["name"]: item for item in base_config["skills"]}
+            head_sources = {item["name"]: item for item in head_config["skills"]}
+            affected_names = {
+                name for name in base_sources.keys() | head_sources.keys()
+                if base_sources.get(name) != head_sources.get(name)
+            }
+            affected_names.update(
+                path.split("/", 2)[1]
+                for path in changed_paths
+                if path.startswith("skills/") and len(path.split("/", 2)) > 1
+            )
+            errors.extend(verify_upstreams(checkout, affected_names))
+        finally:
+            _run(["git", "worktree", "remove", "--force", str(checkout)])
+    if errors:
+        raise ValueError("；".join(errors))
+    _run(["python3", ".github/scripts/sync_skills.py", "--self-check"])
 
 
 def _load_sync_module(root):
@@ -563,42 +677,14 @@ def _merge_pr(event, result):
     if expected_sha != pull["head"]["sha"]:
         raise ValueError("PR 在审查后发生变化，请重新执行 /codex review")
 
-    if pull["changed_files"] > 100:
-        raise ValueError("收录 PR 修改文件超过 100 个，请拆分后重新审查")
-    files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
-    changed_paths = {item["filename"] for item in files}
-    invalid_paths = sorted(
-        path for path in changed_paths
-        if path not in ALLOWED_PR_PATHS and not path.startswith("skills/")
-    )
-    if invalid_paths:
-        raise ValueError(f"收录 PR 包含越界文件：{', '.join(invalid_paths)}")
+    for _ in range(2):
+        pull = _update_pull_branch(repository, pr_number, pull)
+        _validate_merge_candidate(repository, pr_number, pull)
+        if not _pull_is_behind_default(repository, pull):
+            break
+    else:
+        raise ValueError("默认分支持续变化，请稍后重新执行合并")
 
-    _run(["git", "fetch", "--no-tags", "origin", f"refs/pull/{pr_number}/head"])
-    with tempfile.TemporaryDirectory(prefix="codex-pr-") as directory:
-        checkout = Path(directory) / "checkout"
-        _run(["git", "worktree", "add", "--detach", str(checkout), "FETCH_HEAD"])
-        try:
-            errors = validate_catalog(checkout)
-            base_config = json.loads((ROOT / "skills.json").read_text(encoding="utf-8"))
-            head_config = json.loads((checkout / "skills.json").read_text(encoding="utf-8"))
-            base_sources = {item["name"]: item for item in base_config["skills"]}
-            head_sources = {item["name"]: item for item in head_config["skills"]}
-            affected_names = {
-                name for name in base_sources.keys() | head_sources.keys()
-                if base_sources.get(name) != head_sources.get(name)
-            }
-            affected_names.update(
-                path.split("/", 2)[1]
-                for path in changed_paths
-                if path.startswith("skills/") and len(path.split("/", 2)) > 1
-            )
-            errors.extend(verify_upstreams(checkout, affected_names))
-        finally:
-            _run(["git", "worktree", "remove", "--force", str(checkout)])
-    if errors:
-        raise ValueError("；".join(errors))
-    _run(["python3", ".github/scripts/sync_skills.py", "--self-check"])
     merged = _gh_json(
         f"repos/{repository}/pulls/{pr_number}/merge",
         method="PUT",
@@ -788,6 +874,9 @@ def self_check():
     assert not _branch_delete_failed(0, "")
     assert not _branch_delete_failed(1, "Reference does not exist")
     assert _branch_delete_failed(1, "GitHub API unavailable")
+    assert _updated_head_is_base_merge("reviewed", ["reviewed", "base"], 0)
+    assert not _updated_head_is_base_merge("reviewed", ["reviewed"], 0)
+    assert not _updated_head_is_base_merge("reviewed", ["reviewed", "other"], 1)
     sync_pull = {
         "state": "open",
         "base": {"ref": "main"},
