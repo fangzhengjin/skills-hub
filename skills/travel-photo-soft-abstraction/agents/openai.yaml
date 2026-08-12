@@ -1,0 +1,4 @@
+interface:
+  display_name: "Travel Photo Soft Abstraction"
+  short_description: "Create clean upper-photo/lower-panel travel abstractions with source-readable distilled marks."
+  default_prompt: "Use $travel-photo-soft-abstraction to turn my uploaded travel photo into a clean upper-photo/lower-abstraction artwork. Preserve the original photo unchanged above, generate a softly abstract source-readable lower panel, and finalize it with a number, date, and short phrase."

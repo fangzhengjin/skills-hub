@@ -66,6 +66,13 @@
       "repository": "https://github.com/GiMi-Xiaomi/gimi-illustration-skill",
       "path": ".",
       "description": "根据中文文章生成多风格配图，并支持自定义角色形象录入与后续配图"
+    },
+    {
+      "name": "travel-photo-soft-abstraction",
+      "category": "保留原始照片",
+      "repository": "https://github.com/wnby/travel-photo-soft-abstraction",
+      "path": "skills/travel-photo-soft-abstraction",
+      "description": "保留旅行照片原貌并在下方生成源自照片关系的柔和抽象面板与编辑式微文字作品"
     }
   ]
 }

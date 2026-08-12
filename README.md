@@ -41,6 +41,11 @@
     保留真实照片并将其压缩为源自照片结构与光线的纸上记忆版画<br>
     <sub>同步时间：2026-08-12 16:49 · 来源：<a href="https://github.com/wnby/photo-relic-editorial">wnby/photo-relic-editorial</a></sub>
   </li>
+  <li>
+    <a href="skills/travel-photo-soft-abstraction"><strong>travel-photo-soft-abstraction</strong></a><br>
+    保留旅行照片原貌并在下方生成源自照片关系的柔和抽象面板与编辑式微文字作品<br>
+    <sub>同步时间：2026-08-12 23:09 · 来源：<a href="https://github.com/wnby/travel-photo-soft-abstraction/tree/HEAD/skills/travel-photo-soft-abstraction">wnby/travel-photo-soft-abstraction</a></sub>
+  </li>
 </ul>
 
 <h3>照片重绘与重构</h3>
