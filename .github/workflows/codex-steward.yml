@@ -84,6 +84,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      statuses: write
     steps:
       - name: Checkout default branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6

@@ -17,7 +17,46 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  update-branch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      head_sha: ${{ steps.update.outputs.head_sha }}
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout trusted workflow code
+        id: checkout
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      - name: Update PR branch before review
+        id: update
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+        run: >-
+          python3 .github/scripts/codex_steward.py update-review-branch
+          --repository "$GITHUB_REPOSITORY"
+          --pr "$PR_NUMBER"
+          --github-output "$GITHUB_OUTPUT"
+
+      - name: Report branch update setup failure
+        if: failure() && steps.checkout.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: >-
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY"
+          --body "自动更新分支未启动，请检查本次运行：$RUN_URL"
+
   analyze:
+    needs: update-branch
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
@@ -38,11 +77,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           PR_NUMBER: ${{ inputs.pr_number }}
+          EXPECTED_HEAD_SHA: ${{ needs.update-branch.outputs.head_sha }}
         run: >-
           python3 .github/scripts/codex_steward.py prepare-review
           --repository "$GITHUB_REPOSITORY"
           --pr "$PR_NUMBER"
           --output .codex-context
+          --expected-head-sha "$EXPECTED_HEAD_SHA"
 
       - name: Review Skill changes
         id: codex
@@ -68,6 +109,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      statuses: write
     steps:
       - name: Checkout default branch
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6

@@ -76,6 +76,19 @@ def _gh_json(endpoint, *, method="GET", fields=None):
     return json.loads(result.stdout) if result.stdout.strip() else None
 
 
+def _publish_review_status(repository, sha):
+    """为已完成确定性校验的 PR Head 发布合并门禁状态。"""
+    _gh_json(
+        f"repos/{repository}/statuses/{sha}",
+        method="POST",
+        fields={
+            "state": "success",
+            "context": REVIEW_LABEL,
+            "description": "Codex review and deterministic validation passed",
+        },
+    )
+
+
 def _delete_branch_if_exists(repository, branch):
     """删除远端分支；GitHub 已自动删除时保持幂等。"""
     command = [
@@ -116,6 +129,20 @@ def _updated_head_is_base_merge(previous_sha, parent_shas, base_parent_behind):
         and previous_sha in parent_shas
         and base_parent_behind == 0
     )
+
+
+def _can_retry_merge(previous_pull, current_pull, behind_default):
+    """仅在 Head 未变且只是默认分支前进时重试合并。"""
+    return (
+        current_pull["state"] == "open"
+        and current_pull["head"]["sha"] == previous_pull["head"]["sha"]
+        and behind_default
+    )
+
+
+def _review_checkout_matches(checkout_sha, api_sha, expected_sha):
+    """确认模型读取的是预更新 Job 固定的 PR Head。"""
+    return checkout_sha == api_sha and checkout_sha == expected_sha
 
 
 def _update_pull_branch(repository, pr_number, pull):
@@ -457,7 +484,7 @@ def _repository_urls(texts, current_repository):
     return urls[:3]
 
 
-def prepare_context(event_path, output_directory):
+def prepare_context(event_path, output_directory, expected_head_sha=None):
     """获取 Issue/PR 上下文、相关条目和候选上游的静态扫描结果。"""
     event = json.loads(event_path.read_text(encoding="utf-8"))
     repository = event["repository"]["full_name"]
@@ -482,9 +509,19 @@ def prepare_context(event_path, output_directory):
             f"repos/{repository}/pulls/{issue_number}/files?per_page=100"
         )
         _run(["git", "fetch", "--no-tags", "origin", f"refs/pull/{issue_number}/head"])
+        checkout_sha = _run(
+            ["git", "rev-parse", "FETCH_HEAD"], capture=True
+        ).stdout.strip()
+        if not _review_checkout_matches(
+            checkout_sha, pull_request["head"]["sha"], expected_head_sha
+        ):
+            raise ValueError("PR 在准备审查上下文时发生变化，请重新执行审查")
         pull_checkout = output_directory / "pull-request"
-        _run(["git", "worktree", "add", "--detach", str(pull_checkout), "FETCH_HEAD"])
+        _run([
+            "git", "worktree", "add", "--detach", str(pull_checkout), checkout_sha,
+        ])
         pull_request["checkout_path"] = str(pull_checkout)
+        pull_request["checkout_sha"] = checkout_sha
 
     texts = [issue.get("title"), issue.get("body"), event["comment"].get("body")]
     texts.extend(comment.get("body") for comment in comments)
@@ -536,7 +573,9 @@ def prepare_context(event_path, output_directory):
     )
 
 
-def prepare_review_context(repository, pr_number, output_directory):
+def prepare_review_context(
+    repository, pr_number, output_directory, expected_head_sha
+):
     """为指定 Skill 变更 PR 生成只读审查上下文。"""
     event = {
         "repository": {"full_name": repository},
@@ -546,7 +585,7 @@ def prepare_review_context(repository, pr_number, output_directory):
     with tempfile.NamedTemporaryFile("w", encoding="utf-8") as file:
         json.dump(event, file, ensure_ascii=False)
         file.flush()
-        prepare_context(Path(file.name), output_directory)
+        prepare_context(Path(file.name), output_directory, expected_head_sha)
 
 
 def _post_comment(repository, number, body):
@@ -677,21 +716,31 @@ def _merge_pr(event, result):
     if expected_sha != pull["head"]["sha"]:
         raise ValueError("PR 在审查后发生变化，请重新执行 /codex review")
 
-    for _ in range(2):
+    for _ in range(3):
         pull = _update_pull_branch(repository, pr_number, pull)
         _validate_merge_candidate(repository, pr_number, pull)
-        if not _pull_is_behind_default(repository, pull):
+        if _pull_is_behind_default(repository, pull):
+            continue
+        _publish_review_status(repository, pull["head"]["sha"])
+        try:
+            merged = _gh_json(
+                f"repos/{repository}/pulls/{pr_number}/merge",
+                method="PUT",
+                fields={"merge_method": "squash", "sha": pull["head"]["sha"]},
+            )
+        except subprocess.CalledProcessError:
+            current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
+            if _can_retry_merge(
+                pull, current, _pull_is_behind_default(repository, current)
+            ):
+                pull = current
+                continue
+            raise
+        if merged.get("merged"):
             break
+        raise ValueError(merged.get("message", "GitHub 拒绝合并"))
     else:
         raise ValueError("默认分支持续变化，请稍后重新执行合并")
-
-    merged = _gh_json(
-        f"repos/{repository}/pulls/{pr_number}/merge",
-        method="PUT",
-        fields={"merge_method": "squash", "sha": pull["head"]["sha"]},
-    )
-    if not merged.get("merged"):
-        raise ValueError(merged.get("message", "GitHub 拒绝合并"))
 
     cleanup = _merge_cleanup_target(repository, pull)
     cleanup_errors = []
@@ -765,6 +814,44 @@ def _validate_automated_review(
         raise ValueError(f"PR 缺少 {REVIEW_LABEL} 标签")
     if invalid_paths:
         raise ValueError(f"PR 包含越界文件：{', '.join(invalid_paths)}")
+
+
+def update_review_branch(repository, pr_number, github_output=None):
+    """审查前把受控 PR 更新到最新默认分支，冲突时提醒 Owner。"""
+    owner = repository.split("/", 1)[0]
+    try:
+        repository_data = _gh_json(f"repos/{repository}")
+        owner = repository_data["owner"]["login"]
+        pull = _gh_json(f"repos/{repository}/pulls/{pr_number}")
+        files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
+        result = {
+            "action": "merge",
+            "recommendation": "merge",
+            "pr_number": pr_number,
+            "expected_head_sha": pull["head"]["sha"],
+        }
+        _validate_automated_review(
+            pull,
+            repository,
+            repository_data["default_branch"],
+            pr_number,
+            result,
+            {item["filename"] for item in files},
+        )
+        pull = _update_pull_branch(repository, pr_number, pull)
+        if github_output is not None:
+            with github_output.open("a", encoding="utf-8") as file:
+                file.write(f"head_sha={pull['head']['sha']}\n")
+    except Exception as error:
+        _post_comment(
+            repository,
+            pr_number,
+            _blocked_comment(
+                owner,
+                f"### 自动更新分支已停止\n\n{_format_error(error)}",
+            ),
+        )
+        raise
 
 
 def execute_review_result(repository, pr_number, result_path):
@@ -877,6 +964,13 @@ def self_check():
     assert _updated_head_is_base_merge("reviewed", ["reviewed", "base"], 0)
     assert not _updated_head_is_base_merge("reviewed", ["reviewed"], 0)
     assert not _updated_head_is_base_merge("reviewed", ["reviewed", "other"], 1)
+    reviewed_pull = {"state": "open", "head": {"sha": "reviewed"}}
+    assert _can_retry_merge(reviewed_pull, reviewed_pull, True)
+    changed_pull = {"state": "open", "head": {"sha": "changed"}}
+    assert not _can_retry_merge(reviewed_pull, changed_pull, True)
+    assert not _can_retry_merge(reviewed_pull, reviewed_pull, False)
+    assert _review_checkout_matches("reviewed", "reviewed", "reviewed")
+    assert not _review_checkout_matches("changed", "changed", "reviewed")
     sync_pull = {
         "state": "open",
         "base": {"ref": "main"},
@@ -971,6 +1065,11 @@ def main():
     prepare_review.add_argument("--repository", required=True)
     prepare_review.add_argument("--pr", type=int, required=True)
     prepare_review.add_argument("--output", type=Path, required=True)
+    prepare_review.add_argument("--expected-head-sha", required=True)
+    update_review = subparsers.add_parser("update-review-branch")
+    update_review.add_argument("--repository", required=True)
+    update_review.add_argument("--pr", type=int, required=True)
+    update_review.add_argument("--github-output", type=Path)
     execute = subparsers.add_parser("execute")
     execute.add_argument("--event", type=Path, required=True)
     execute.add_argument("--result", type=Path, required=True)
@@ -986,7 +1085,16 @@ def main():
     if arguments.command == "prepare":
         prepare_context(arguments.event, arguments.output)
     elif arguments.command == "prepare-review":
-        prepare_review_context(arguments.repository, arguments.pr, arguments.output)
+        prepare_review_context(
+            arguments.repository,
+            arguments.pr,
+            arguments.output,
+            arguments.expected_head_sha,
+        )
+    elif arguments.command == "update-review-branch":
+        update_review_branch(
+            arguments.repository, arguments.pr, arguments.github_output
+        )
     elif arguments.command == "execute":
         pr_number = execute_result(arguments.event, arguments.result)
         if pr_number is not None and arguments.github_output is not None:
