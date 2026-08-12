@@ -69,6 +69,11 @@
     根据概念或视觉参考生成松弛黑色钢笔插画、叙事场景与标志探索<br>
     <sub>同步时间：2026-08-12 13:25 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
   </li>
+  <li>
+    <a href="skills/gimi-illustration"><strong>gimi-illustration</strong></a><br>
+    根据中文文章生成多风格配图，并支持自定义角色形象录入与后续配图<br>
+    <sub>同步时间：2026-08-12 22:27 · 来源：<a href="https://github.com/GiMi-Xiaomi/gimi-illustration-skill">GiMi-Xiaomi/gimi-illustration-skill</a></sub>
+  </li>
 </ul>
 <!-- skills:end -->
 
