@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""为 `/codex` 指令准备审查上下文，并执行受约束的仓库操作。"""
+"""为 Owner 指令准备审查上下文，并执行受约束的仓库操作。"""
 
 import argparse
 import hashlib
@@ -620,11 +620,26 @@ def _repository_urls(texts, current_repository):
     return urls[:3]
 
 
+def _owner_instruction(event):
+    """把评论或 Issue 收录标签转换为统一的 Owner 指令。"""
+    comment = event.get("comment")
+    if comment is not None:
+        return comment.get("body", "")
+    if (
+        event.get("action") == "labeled"
+        and event.get("label", {}).get("name") == REVIEW_LABEL
+        and "pull_request" not in event.get("issue", {})
+    ):
+        return "/codex 审查并创建 PR"
+    return ""
+
+
 def prepare_context(event_path, output_directory, expected_head_sha=None):
     """获取 Issue/PR 上下文、相关条目和候选上游的静态扫描结果。"""
     event = json.loads(event_path.read_text(encoding="utf-8"))
     repository = event["repository"]["full_name"]
     issue_number = event["issue"]["number"]
+    instruction = _owner_instruction(event)
     output_directory.mkdir(parents=True, exist_ok=True)
 
     issue = _gh_json(f"repos/{repository}/issues/{issue_number}")
@@ -657,7 +672,7 @@ def prepare_context(event_path, output_directory, expected_head_sha=None):
         pull_request["checkout_path"] = str(pull_checkout)
         pull_request["checkout_sha"] = checkout_sha
 
-    texts = [issue.get("title"), issue.get("body"), event["comment"].get("body")]
+    texts = [issue.get("title"), issue.get("body"), instruction]
     texts.extend(comment.get("body") for comment in comments)
     texts.extend(file.get("patch") for file in pull_files)
     upstreams = []
@@ -691,7 +706,7 @@ def prepare_context(event_path, output_directory, expected_head_sha=None):
         upstreams.append(record)
 
     context = {
-        "instruction": event["comment"]["body"],
+        "instruction": instruction,
         "issue": issue,
         "comments": comments,
         "pull_request": pull_request,
@@ -1040,7 +1055,7 @@ def execute_result(event_path, result_path):
     result = json.loads(result_path.read_text(encoding="utf-8"))
     actor = event["sender"]["login"]
     owner = event["repository"]["owner"]["login"]
-    instruction = event["comment"]["body"]
+    instruction = _owner_instruction(event)
     if actor != owner or not PREFIX_PATTERN.match(instruction):
         raise ValueError("只有仓库 Owner 的 /codex 指令可以执行")
     action = result.get("action")
@@ -1081,6 +1096,17 @@ def self_check():
     assert PREFIX_PATTERN.match("/codex")
     assert PREFIX_PATTERN.match("/codex 审查")
     assert not PREFIX_PATTERN.match("请 /codex 审查")
+    assert _owner_instruction({"comment": {"body": "/codex 审查"}}) == "/codex 审查"
+    assert _owner_instruction({
+        "action": "labeled",
+        "label": {"name": REVIEW_LABEL},
+        "issue": {},
+    }) == "/codex 审查并创建 PR"
+    assert not _owner_instruction({
+        "action": "labeled",
+        "label": {"name": REVIEW_LABEL},
+        "issue": {"pull_request": {}},
+    })
     assert _repository_urls(
         ["候选：https://github.com/example/demo/tree/main/skill"], "owner/hub"
     ) == ["https://github.com/example/demo"]
