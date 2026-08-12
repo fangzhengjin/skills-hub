@@ -153,8 +153,10 @@ def _can_retry_merge(previous_pull, current_pull, behind_default):
 
 
 def _review_checkout_matches(checkout_sha, api_sha, expected_sha):
-    """确认模型读取的是预更新 Job 固定的 PR Head。"""
-    return checkout_sha == api_sha and checkout_sha == expected_sha
+    """确认拉取的 PR Head 与当前 API 及可选的锁定版本一致。"""
+    return checkout_sha == api_sha and (
+        expected_sha is None or checkout_sha == expected_sha
+    )
 
 
 def _collection_candidate(base_config, head_config, changed_paths):
@@ -1096,6 +1098,10 @@ def self_check():
     assert PREFIX_PATTERN.match("/codex")
     assert PREFIX_PATTERN.match("/codex 审查")
     assert not PREFIX_PATTERN.match("请 /codex 审查")
+    assert _review_checkout_matches("head", "head", None)
+    assert _review_checkout_matches("head", "head", "head")
+    assert not _review_checkout_matches("head", "changed", None)
+    assert not _review_checkout_matches("head", "head", "changed")
     assert _owner_instruction({"comment": {"body": "/codex 审查"}}) == "/codex 审查"
     assert _owner_instruction({
         "action": "labeled",
