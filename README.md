@@ -36,6 +36,11 @@
     保留真实照片窗口，并提炼 E1 几何、E2 间隔、E3 色彩三个可追溯证据条目，生成编辑式档案海报<br>
     <sub>同步时间：2026-08-10 09:32 · 来源：<a href="https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-evidence-ledger">byJming/photo-skills-atelier</a></sub>
   </li>
+  <li>
+    <a href="skills/photo-relic-editorial"><strong>photo-relic-editorial</strong></a><br>
+    保留真实照片并将其压缩为源自照片结构与光线的纸上记忆版画<br>
+    <sub>同步时间：2026-08-12 16:49 · 来源：<a href="https://github.com/wnby/photo-relic-editorial">wnby/photo-relic-editorial</a></sub>
+  </li>
 </ul>
 
 <h3>照片重绘与重构</h3>

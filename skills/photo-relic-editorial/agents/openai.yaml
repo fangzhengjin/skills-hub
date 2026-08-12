@@ -1,0 +1,4 @@
+interface:
+  display_name: "Photo Relic Editorial"
+  short_description: "Create distinctive photo relic artworks from real photographs."
+  default_prompt: "Use $photo-relic-editorial to turn this photo into a Photo Relic artwork with a truthful photo region and a recognizable abstract memory print."
