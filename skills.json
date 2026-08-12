@@ -52,6 +52,13 @@
       "repository": "https://github.com/haorantang97/antibes-holiday",
       "path": "plugins/antibes-holiday/skills/antibes-holiday",
       "description": "根据概念或视觉参考生成松弛黑色钢笔插画、叙事场景与标志探索"
+    },
+    {
+      "name": "photo-relic-editorial",
+      "category": "保留原始照片",
+      "repository": "https://github.com/wnby/photo-relic-editorial",
+      "path": ".",
+      "description": "保留真实照片并将其压缩为源自照片结构与光线的纸上记忆版画"
     }
   ]
 }
