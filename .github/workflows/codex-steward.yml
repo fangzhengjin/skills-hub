@@ -78,6 +78,8 @@ jobs:
     if: needs.analyze.outputs.result != ''
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      pr_number: ${{ steps.execute.outputs.pr_number }}
     permissions:
       contents: write
       issues: write
@@ -97,12 +99,47 @@ jobs:
           Path(".codex-result.json").write_text(os.environ["CODEX_RESULT"], encoding="utf-8")'
 
       - name: Execute authorized action
+        id: execute
         env:
           GH_TOKEN: ${{ github.token }}
         run: >-
           python3 .github/scripts/codex_steward.py execute
           --event "$GITHUB_EVENT_PATH"
           --result .codex-result.json
+          --github-output "$GITHUB_OUTPUT"
+
+  dispatch-review:
+    needs: execute
+    if: needs.execute.outputs.pr_number != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      issues: write
+    steps:
+      - name: Start PR review workflow
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          PR_NUMBER: ${{ needs.execute.outputs.pr_number }}
+        run: >-
+          gh workflow run codex-review.yml
+          --repo "$GITHUB_REPOSITORY"
+          --ref "$DEFAULT_BRANCH"
+          -f "pr_number=$PR_NUMBER"
+
+      - name: Report review dispatch failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          PR_NUMBER: ${{ needs.execute.outputs.pr_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "@$OWNER
+
+          ### 自动审查未启动
+
+          请检查本次运行并重试：$RUN_URL"
 
   report-analysis-failure:
     needs: analyze
