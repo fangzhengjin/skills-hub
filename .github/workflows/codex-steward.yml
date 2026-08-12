@@ -43,12 +43,10 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          gh api --silent --method POST \
-            "repos/$GITHUB_REPOSITORY/issues/$ISSUE_NUMBER/reactions" \
-            -f content=eyes
-          gh issue edit "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
-            --remove-label codex-review
+          gh issue comment "$ISSUE_NUMBER" --repo "$GITHUB_REPOSITORY" \
+            --body "Codex 已开始审查收录申请：[查看运行]($RUN_URL)"
 
   analyze:
     if: >-
