@@ -66,6 +66,13 @@
       "repository": "https://github.com/GiMi-Xiaomi/gimi-illustration-skill",
       "path": ".",
       "description": "根据中文文章生成多风格配图，并支持自定义角色形象录入与后续配图"
+    },
+    {
+      "name": "paper-spirit-zine",
+      "category": "保留原始照片",
+      "repository": "https://github.com/wnby/paper-spirit-zine",
+      "path": "skills/paper-spirit-zine",
+      "description": "保留真实照片并在下方纸面生成源自场景的生命感余像海报"
     }
   ]
 }
