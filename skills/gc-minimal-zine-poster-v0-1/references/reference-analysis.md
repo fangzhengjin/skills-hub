@@ -11,7 +11,7 @@ For every usable image, record or inspect:
 - estimated negative-space range;
 - subject or cluster scale;
 - background tone and paper texture;
-- anchor type and material treatment;
+- focal-element type and material treatment;
 - composition position and balance;
 - typography family, scale, and distribution;
 - main hue, support hue, and approximate color role;

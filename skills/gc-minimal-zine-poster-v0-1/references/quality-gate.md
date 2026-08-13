@@ -10,10 +10,12 @@ Inspect the actual raster before returning it.
 - The event expresses one metaphor or relation rather than a full scene.
 - Paper fiber, scan, print, clipping, or specimen treatment is visibly present.
 - Typography participates in the composition without becoming a commercial headline system.
-- One main high-chroma anchor is visible at thumbnail scale.
+- One main high-chroma color accent is visible at thumbnail scale.
 - The main chromatic area is roughly 0.8%-2.5% of the canvas or 15%-35% of the visual cluster.
 - The main color is not weakened by low-saturation language intended only for paper or photography.
-- The chosen layout, anchor, typography, texture, and mood are recognizable in the result.
+- The chosen layout, focal element, typography, texture, and mood are recognizable in the result.
+- No unrequested maritime symbol, ship-mooring icon, or generic pictogram has been introduced.
+- The final generation prompt names the concrete focal-element carrier and color carrier instead of using ambiguous compositional shorthand.
 - The image avoids full-bleed, product-ad, logo, CTA, mockup, glossy, cinematic, 3D, neon, cartoon, fashion-drama, dense-scrapbook, and multicolor-template drift.
 - The result does not copy source text, brand identity, watermark, signature, exact date/location, or exact composition from reference-only images.
 

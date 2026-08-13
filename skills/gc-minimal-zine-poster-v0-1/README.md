@@ -1,19 +1,19 @@
-# GC Minimal Zine Poster
+# GC Minimal Zine Poster v0.3.1
 
 **English** · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)
 
-Minimal Zine Poster v0.3 is a Codex skill for turning a theme, sentence, article idea, object, mood, photograph, or reference set into a sparse paper-texture editorial poster, a production-ready image prompt, or a reusable visual system.
+Minimal Zine Poster v0.3.1 is a Codex skill for turning a theme, sentence, article idea, object, mood, photograph, or reference set into a sparse paper-texture editorial poster, a production-ready image prompt, or a reusable visual system.
 
 The callable skill name is `gc-minimal-zine-poster-v0-3`.
 
-## What's New in v0.3
+## What's New in v0.3.1
 
-- Separate Generate, Reference Analysis, Prompt-only, and Analyze + Generate routes.
-- A Photo Input subflow that classifies each supplied image as an edit target, reference image, or supporting insert and records the required preservation level.
-- Evidence-based reference analysis that separates fixed system rules, variable rules, and source-specific residue.
-- Stronger batch variation across layout, anchor form, typography distribution, texture, decoration, mood, and color.
-- Modular prompt compilation and quality gates in `references/`.
-- Codex UI metadata and reusable evaluation prompts.
+- Replaces ambiguous composition wording with concrete focal-element and color-accent language.
+- Requires the final image prompt to name the visible carrier, such as a photo crop, paper cutout, ink block, specimen, printed illustration, texture window, or typography.
+- Adds quality checks for unrequested maritime symbols and generic pictograms.
+- Adds a regression eval for a non-maritime theme with a bright red focal element.
+- Keeps Generate, Reference Analysis, Prompt-only, Analyze + Generate, and Photo Input routes unchanged.
+- Keeps the callable Skill name `gc-minimal-zine-poster-v0-3` for backward compatibility.
 
 ## Visual Direction
 
@@ -23,7 +23,7 @@ The skill compiles each request into a sparse vertical paper poster with:
 - 70%-90% negative space
 - one small imageable subject or visual event
 - serif, typewriter, monospaced, or restrained small sans-serif typography
-- one clearly visible high-chroma color anchor
+- one clearly visible high-chroma color accent
 - xerox, risograph, halftone, letterpress, or scanned-paper defects
 - a quiet Japanese/Korean indie-zine or minimal editorial mood
 
@@ -55,7 +55,7 @@ The Skill package contains no scripts, external fonts, API keys, private paths, 
 
 ## Installation
 
-Clone the current v0.3 release into a matching Skill directory:
+Clone the current v0.3.1 release into a matching Skill directory:
 
 ```bash
 git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
@@ -64,11 +64,21 @@ git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
 
 Restart Codex if the Skill does not appear immediately.
 
+## Upgrading from v0.3.0
+
+The callable Skill name and installation directory remain unchanged. If your existing v0.3 installation is a clean Git checkout, update it with:
+
+```bash
+git -C ~/.codex/skills/gc-minimal-zine-poster-v0-3 pull --ff-only
+```
+
+If the directory is not a Git checkout or contains local edits, install a fresh copy separately and compare your changes before replacing anything.
+
 ## Upgrading from v0.1
 
-Do not pull v0.3 into an existing `~/.codex/skills/gc-minimal-zine-poster-v0-1` directory. The folder name and the Skill frontmatter name must stay aligned.
+Do not pull v0.3.1 into an existing `~/.codex/skills/gc-minimal-zine-poster-v0-1` directory. The folder name and the Skill frontmatter name must stay aligned.
 
-Install v0.3 beside the old copy using the command above. After confirming v0.3 works, you may keep or remove the old directory yourself.
+Install v0.3.1 beside the old copy using the command above. After confirming v0.3.1 works, you may keep or remove the old directory yourself.
 
 To install the preserved v0.1 release:
 
@@ -136,6 +146,10 @@ Reference-analysis requests return the evidence-based visual system and reusable
 - `evals/evals.json`: reusable evaluation prompts
 - `examples/`: six author-created poster examples
 - `LICENSE`: MIT license
+
+## Acknowledgements
+
+Thanks to Xiaohongshu user **@李李** for reporting that an abstract composition term could be interpreted literally and introduce an unintended nautical icon. This feedback led directly to the v0.3.1 terminology, prompt-compiler, quality-gate, and regression-eval fixes.
 
 ## License
 
