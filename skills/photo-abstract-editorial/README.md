@@ -1,6 +1,9 @@
 ## 声明
 Free for personal, educational and non-commercial use. Commercial use requires prior authorization. If you build something with these Skills, attribution and @AM. are greatly appreciated.
 
+商业授权联系ccletterbox@163.com
+douyin: 12919593  xiaohongshu: Cclz_9
+
 在这里吐槽一下，真的很无语这几天，被人抄袭，甚至有人拿这个东西去卖，我真的无语！
 
 # Photo Abstract Editorial
@@ -76,3 +79,8 @@ photo-abstract-editorial/
 ```
 
 `assets/examples` 中的图片仅用于理解预期输入类型；除非用户上传该图片本身，否则不要将其中的主题、色彩或构图复用于新的作品。
+请作者喝杯咖啡
+<p align="center">
+  <img src="./pay/AliPay.jpg" width="32%">
+  <img src="./pay/WechatPay.jpg" width="32%">
+</p>
