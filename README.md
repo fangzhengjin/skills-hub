@@ -70,6 +70,11 @@
     聚焦一个主体、一个陪体及其关系，按固定场景配方重构为留白手绘小世界，删去大部分照片场景<br>
     <sub>同步时间：2026-08-10 09:32 · 来源：<a href="https://github.com/byJming/photo-skills-atelier/tree/HEAD/photo-small-world-revival">byJming/photo-skills-atelier</a></sub>
   </li>
+  <li>
+    <a href="skills/fantasy-life-force-portrait-photography"><strong>fantasy-life-force-portrait-photography</strong></a><br>
+    将普通人像照片或主题转化为色彩鲜明、镜头亲密的生命感摄影作品与图像生成编辑方案<br>
+    <sub>同步时间：2026-08-14 01:20 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography">dacnay816y62-hub/fantasy-life-force-portrait-photography</a></sub>
+  </li>
 </ul>
 
 <h3>插画与视觉创作</h3>
