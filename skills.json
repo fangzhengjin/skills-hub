@@ -94,6 +94,13 @@
       "repository": "https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography",
       "path": ".",
       "description": "将普通人像照片或主题转化为色彩鲜明、镜头亲密的生命感摄影作品与图像生成编辑方案"
+    },
+    {
+      "name": "culture-fragment-poster-engine",
+      "category": "插画与视觉创作",
+      "repository": "https://github.com/dacnay816y62-hub/culture-fragment-poster-engine",
+      "path": ".",
+      "description": "将文化素材整理为可追溯视觉系统并生成高级海报与品牌视觉"
     }
   ]
 }
