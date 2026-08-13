@@ -80,6 +80,13 @@
       "repository": "https://github.com/2998980-hue/surreal-pop-collage",
       "path": ".",
       "description": "将照片主体去色保留为现实锚，并以平涂色形和单一巨物重构超现实波普拼贴画"
+    },
+    {
+      "name": "cinema-dna-21x9x3",
+      "category": "插画与视觉创作",
+      "repository": "https://github.com/dacnay816y62-hub/cinema-dna-21x9x3",
+      "path": ".",
+      "description": "将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面"
     }
   ]
 }

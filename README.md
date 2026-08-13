@@ -84,6 +84,11 @@
     根据中文文章生成多风格配图，并支持自定义角色形象录入与后续配图<br>
     <sub>同步时间：2026-08-12 22:27 · 来源：<a href="https://github.com/GiMi-Xiaomi/gimi-illustration-skill">GiMi-Xiaomi/gimi-illustration-skill</a></sub>
   </li>
+  <li>
+    <a href="skills/cinema-dna-21x9x3"><strong>cinema-dna-21x9x3</strong></a><br>
+    将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面<br>
+    <sub>同步时间：2026-08-13 22:58 · 来源：<a href="https://github.com/dacnay816y62-hub/cinema-dna-21x9x3">dacnay816y62-hub/cinema-dna-21x9x3</a></sub>
+  </li>
 </ul>
 <!-- skills:end -->
 
