@@ -1,0 +1,4 @@
+interface:
+  display_name: "fantasy-摄影模拟"
+  short_description: "生成哈苏、徕卡、理光气质的 AI 摄影组图。"
+  default_prompt: "Use $fantasy-photography-simulation to generate 3:4 AI 摄影组图；每个编号单独输出一张图，每张由 2-4 张同地点同主题摄影小图组成。"

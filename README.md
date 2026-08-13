@@ -94,6 +94,11 @@
     将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面<br>
     <sub>同步时间：2026-08-13 22:58 · 来源：<a href="https://github.com/dacnay816y62-hub/cinema-dna-21x9x3">dacnay816y62-hub/cinema-dna-21x9x3</a></sub>
   </li>
+  <li>
+    <a href="skills/fantasy-photography-simulation"><strong>fantasy-photography-simulation</strong></a><br>
+    根据地点、题材与相机气质生成同地点叙事摄影组图提示与出图流程<br>
+    <sub>同步时间：2026-08-14 01:31 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-photography-simulation-github/tree/HEAD/fantasy-photography-simulation">dacnay816y62-hub/fantasy-photography-simulation-github</a></sub>
+  </li>
 </ul>
 <!-- skills:end -->
 
