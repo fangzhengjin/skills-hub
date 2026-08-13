@@ -5,17 +5,17 @@ Choose one option from each axis. The subject must come from the content metapho
 ## Layout Family
 
 - **center-fragment:** tiny central event with surrounding air.
-- **lower-left-float:** anchor in the lower-left quadrant with dominant empty top field.
+- **lower-left-float:** focal element in the lower-left quadrant with dominant empty top field.
 - **upper-right-block:** color or photo block in the upper-right with loose text drift.
 - **dual-panel:** two small adjacent or overlapping panels with a narrow gap.
 - **irregular-cutout:** one torn or organic paper shape carrying image or type.
-- **type-led:** typography is the primary anchor; image is secondary or absent.
+- **type-led:** typography is the primary focal element; image is secondary or absent.
 - **dot-orbit:** sparse marks, letters, or lines orbit one small subject.
 - **single-specimen:** one isolated object or mark with almost no support graphics.
 - **diagonal-notes:** two or three small elements create a restrained diagonal movement.
-- **edge-counterweight:** an off-axis anchor is balanced by one distant microtext or date mark.
+- **edge-counterweight:** an off-axis focal element is balanced by one distant microtext or date mark.
 
-## Anchor Form
+## Focal-Element Form
 
 - tiny faded photo;
 - clean rectangular photo crop;
@@ -64,12 +64,12 @@ Use zero to three restrained elements:
 
 ## Selection Rules
 
-- Change visual grammar, not only coordinates. A new recipe should alter at least layout family, anchor form, and typography mode relative to the preceding visible output.
+- Change visual grammar, not only coordinates. A new recipe should alter at least layout family, focal-element form, and typography mode relative to the preceding visible output.
 - Do not let decorative marks become the subject.
-- Do not choose a random object independently of the user's theme. First choose the metaphor, then choose its anchor form.
+- Do not choose a random object independently of the user's theme. First choose the metaphor, then choose its focal-element form.
 - Do not repeat `center-fragment` simply because it is safe. If the previous visible result is centered, prefer an off-axis, dual-panel, type-led, or edge-counterweight family.
-- If the recipe becomes dense, remove decorative marks first, then microtext. Preserve the metaphor and main color anchor.
-- For a batch of four or more, use at least three layout families. Do not repeat the same layout + anchor pair on adjacent images.
+- If the recipe becomes dense, remove decorative marks first, then microtext. Preserve the metaphor and main color accent.
+- For a batch of four or more, use at least three layout families. Do not repeat the same layout + focal-element pair on adjacent images.
 - For a batch, at least 60% of images should carry the main hue through the subject, cutout, block, partial photo region, or bold type rather than a tiny dot or hairline.
 
 ## Recipe Record
@@ -77,7 +77,7 @@ Use zero to three restrained elements:
 Record the selection in this order:
 
 ```text
-[layout / metaphor / anchor / typography / main hue and material / texture / decorative system / mood]
+[layout / metaphor / focal element / typography / main hue and material / texture / decorative system / mood]
 ```
 
 The recipe is an execution record, not extra prose for the image prompt.

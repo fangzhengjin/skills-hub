@@ -1,19 +1,19 @@
-# GC Minimal Zine Poster
+# GC Minimal Zine Poster v0.3.1
 
 [English](README.md) · **简体中文** · [日本語](README.ja.md)
 
-Minimal Zine Poster v0.3 是一个 Codex Skill：它可以把主题、句子、文章构想、物件、情绪、照片或参考图集，转化为一张纸张质感的极简编辑海报、一条可直接使用的生图 Prompt，或一套可复用的视觉系统。
+Minimal Zine Poster v0.3.1 是一个 Codex Skill：它可以把主题、句子、文章构想、物件、情绪、照片或参考图集，转化为一张纸张质感的极简编辑海报、一条可直接使用的生图 Prompt，或一套可复用的视觉系统。
 
 调用名称为 `gc-minimal-zine-poster-v0-3`。
 
-## v0.3 新增内容
+## v0.3.1 更新内容
 
-- 将请求分为生成、参考图分析、仅 Prompt、分析后生成等不同路线。
-- 增加 Photo Input 子流程：把用户图片区分为编辑目标、风格参考或辅助插入，并明确记录保真等级。
-- 参考图分析会区分固定系统、可变系统和只属于原样本的残留信息。
-- 批量生成会主动改变布局、视觉锚点、字体分布、纹理、装饰、情绪和颜色，而不只是换位置。
-- Prompt 编译器与质量门拆分到 `references/`，方便维护和按需读取。
-- 增加 Codex 界面元数据和可复用评测 Prompt。
+- 用明确的视觉重心与色彩强调语言，替代可能被按字面误解的抽象构图术语。
+- 要求最终生图 Prompt 写清实际可见载体，例如照片裁切、纸片、墨块、标本、印刷插图、纹理窗口或字体。
+- 质量检查新增无关船用符号与通用图标检查。
+- 新增一条非海事主题、鲜红色视觉重心的回归评测。
+- 保留 Generate、Reference Analysis、Prompt-only、Analyze + Generate 和 Photo Input 路线。
+- 为了向后兼容，调用名称继续使用 `gc-minimal-zine-poster-v0-3`。
 
 ## 视觉方向
 
@@ -23,7 +23,7 @@ Minimal Zine Poster v0.3 是一个 Codex Skill：它可以把主题、句子、�
 - 70%–90% 的留白
 - 一个小型、可被清楚表现的主体或视觉事件
 - 衬线、打字机、等宽或克制的小号无衬线字体
-- 一个清晰可见的高饱和度色彩锚点
+- 一个清晰可见的高饱和度色彩强调区域
 - 复印、孔版印刷、网点、凸版印刷或扫描纸张的瑕疵与质感
 - 安静的日式／韩式独立 ZINE 或极简编辑设计氛围
 
@@ -55,7 +55,7 @@ Skill 包中不包含脚本、外部字体、API 密钥、私有路径或需要�
 
 ## 安装
 
-把当前 v0.3 克隆到名称一致的 Skill 目录：
+把当前 v0.3.1 克隆到名称一致的 Skill 目录：
 
 ```bash
 git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
@@ -64,11 +64,21 @@ git clone https://github.com/LiamGvchi/gc-minimal-zine-poster.git \
 
 如果 Skill 没有立即出现，请重启 Codex。
 
+## 从 v0.3.0 升级
+
+调用名称和安装目录保持不变。如果现有 v0.3 安装是干净的 Git 仓库，可以执行：
+
+```bash
+git -C ~/.codex/skills/gc-minimal-zine-poster-v0-3 pull --ff-only
+```
+
+如果该目录不是 Git 仓库，或包含本地修改，请先安装一份全新副本并比较差异，不要直接覆盖自己的改动。
+
 ## 从 v0.1 升级
 
-不要在已有的 `~/.codex/skills/gc-minimal-zine-poster-v0-1` 目录里直接拉取 v0.3。文件夹名必须与 Skill frontmatter 中的名称保持一致。
+不要在已有的 `~/.codex/skills/gc-minimal-zine-poster-v0-1` 目录里直接拉取 v0.3.1。文件夹名必须与 Skill frontmatter 中的名称保持一致。
 
-请使用上面的安装命令，把 v0.3 安装在旧版本旁边。确认 v0.3 可以正常调用后，你可以自行决定保留或删除旧目录。
+请使用上面的安装命令，把 v0.3.1 安装在旧版本旁边。确认 v0.3.1 可以正常调用后，你可以自行决定保留或删除旧目录。
 
 如果仍然需要安装保留的 v0.1：
 
@@ -136,6 +146,10 @@ git clone --branch v0.1.0 \
 - `evals/evals.json`：可复用评测 Prompt
 - `examples/`：六张由作者制作的海报示例
 - `LICENSE`：MIT 许可证
+
+## 致谢
+
+感谢小红书用户 **@李李** 指出：提示词中的抽象构图术语可能被模型按字面理解，生成无关的船用图标。这条反馈直接促成了 v0.3.1 对术语、Prompt 编译器、质量检查和回归评测的系统修复。
 
 ## 许可证
 

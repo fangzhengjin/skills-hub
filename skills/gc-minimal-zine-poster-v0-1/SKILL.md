@@ -1,9 +1,9 @@
 ---
 name: gc-minimal-zine-poster-v0-3
-description: Generate or analyze poetic paper-texture minimal zine posters with large negative space, a small editorial collage or visual anchor, experimental typography, and one clear color accent. Use when the user gives a theme, sentence, article, mood, object, photo, content brief, reference images, or an image folder and wants a final poster image, a production-ready image prompt, reusable style rules, or varied layouts that stay in one visual family.
+description: Generate or analyze poetic paper-texture minimal zine posters with large negative space, a small editorial collage or focal element, experimental typography, and one clear color accent. Use when the user gives a theme, sentence, article, mood, object, photo, content brief, reference images, or an image folder and wants a final poster image, a production-ready image prompt, reusable style rules, or varied layouts that stay in one visual family.
 ---
 
-# Minimal Zine Poster v0.3
+# Minimal Zine Poster v0.3.1
 
 Turn content or visual references into a coherent paper-poster system. Preserve the original production contract: unless the user explicitly asks for analysis or prompt-only output, return both a final image-generation prompt and the generated raster image.
 
@@ -74,10 +74,10 @@ Run the photo workflow:
 
 1. **Parse the content.** Identify the core subject, emotional temperature, supplied text, and every input image role. When a photograph is supplied, complete Photo Input Mode before choosing the metaphor. For an article or abstract idea, reduce it to one central imageable relation rather than illustrating the whole argument.
 2. **Choose one visual metaphor.** Use one object, fragment, photo crop, specimen, silhouette, printed illustration, texture window, typographic object, or small conceptual relation. Avoid a full illustrated scene.
-3. **Select a variation recipe.** Choose one layout family, anchor type, typography mode, texture mode, mood, paper tone, accent hue, and decorative-mark system from `references/variation-engine.md`. Randomness must change visual grammar, not only position.
-4. **Compile the prompt.** Follow the field order and four-paragraph shape in `references/prompt-compiler.md`. State the anchor position and size, exact high-chroma hue, material form, and approximate visual share.
+3. **Select a variation recipe.** Choose one layout family, focal-element type, typography mode, texture mode, mood, paper tone, accent hue, and decorative-mark system from `references/variation-engine.md`. Randomness must change visual grammar, not only position.
+4. **Compile the prompt.** Follow the field order and four-paragraph shape in `references/prompt-compiler.md`. State the focal element's position and size, exact high-chroma hue, material form, and approximate visual share. Use concrete visible nouns in the final generation prompt; do not leave abstract compositional shorthand that an image model could render as an unrelated object or icon.
 5. **Generate the image.** Use the built-in image-generation capability. For Photo Input Mode, include the actual supplied image through the mechanism defined above. Do not return prompt-only output unless the user requested it.
-6. **Inspect the actual result.** Apply `references/quality-gate.md` at full view and thumbnail scale. For Photo Input Mode, also compare the result with the source image and declared preservation invariants. If the result clearly violates the chosen recipe, loses the color anchor, becomes commercial/full-bleed, collapses into an unrelated style, or breaks required preservation, tighten the prompt and regenerate once.
+6. **Inspect the actual result.** Apply `references/quality-gate.md` at full view and thumbnail scale. For Photo Input Mode, also compare the result with the source image and declared preservation invariants. If the result clearly violates the chosen recipe, loses the color accent, introduces an unrelated maritime symbol or generic icon, becomes commercial/full-bleed, collapses into an unrelated style, or breaks required preservation, tighten the prompt and regenerate once.
 7. **Return the image, final prompt, recipe, one short interpretation note, and photo role/preservation details when applicable.**
 
 ## Reference Analysis Workflow
@@ -95,9 +95,9 @@ Run the photo workflow:
 ## Variation Discipline
 
 - Do not default repeatedly to “tiny centered photo + blue dots + microtext.”
-- When several outputs are requested, change at least the layout family, anchor structure, and typography distribution between adjacent images.
+- When several outputs are requested, change at least the layout family, focal-element structure, and typography distribution between adjacent images.
 - Use recent outputs only when they are visible in the current conversation or supplied batch. Do not claim memory of images outside the available context.
-- Preserve one visual family through paper surface, high negative space, restrained typography, print/scan reproduction, and one dominant chromatic anchor.
+- Preserve one visual family through paper surface, high negative space, restrained typography, print/scan reproduction, and one dominant chromatic accent.
 - If a recipe becomes dense, remove decorative marks or secondary text before weakening the main visual metaphor.
 
 ## Output Formats
@@ -107,7 +107,7 @@ Run the photo workflow:
 ````markdown
 **生成图**
 
-![Minimal Zine Poster v0.3](absolute-image-path-or-rendered-image)
+![Minimal Zine Poster v0.3.1](absolute-image-path-or-rendered-image)
 
 **最终 Prompt**
 
@@ -118,7 +118,7 @@ Run the photo workflow:
 **说明**
 
 - Mode: Generate
-- Recipe: [layout / anchor / typography / accent / texture / mood]
+- Recipe: [layout / focal element / typography / accent / texture / mood]
 - Photo role: [edit target / reference image / supporting insert, omit when no photo was supplied]
 - Preservation: [high / medium + main invariants, or low + reference traits; omit when no photo was supplied]
 - [one short note about the content interpretation and any regeneration]

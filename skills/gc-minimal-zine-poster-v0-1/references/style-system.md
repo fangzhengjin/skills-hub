@@ -16,8 +16,8 @@ The image is a flat scanned paper field carrying one small visual event. That ev
 - **Visual event:** one primary metaphor or relation, not a full illustrated scene or an inventory of objects.
 - **Depth:** flat orthographic scan, diffuse light, low-to-medium contrast, no hard shadow, no photographic mockup depth.
 - **Typography:** sparse typewriter, old serif, fine serif, monospaced, or restrained small sans serif. Text behaves like a note, fragment, label, date, or private sentence rather than an advertising headline.
-- **Color:** paper and gray/black support one clearly saturated chromatic anchor visible at thumbnail size.
-- **Reproduction:** the anchor and typography belong to the same printed/scanned world through halftone, xerox softness, risograph grain, letterpress bleed, scanline, paper edge, or slight misregistration.
+- **Color:** paper and gray/black support one clearly saturated chromatic accent visible at thumbnail size.
+- **Reproduction:** the focal element and typography belong to the same printed/scanned world through halftone, xerox softness, risograph grain, letterpress bleed, scanline, paper edge, or slight misregistration.
 - **Mood:** quiet, poetic, distant, archival, diary-like, memory-like, Japanese/Korean indie zine, or minimal editorial.
 
 ## Color System
@@ -33,8 +33,8 @@ The image is a flat scanned paper field carrying one small visual event. That ev
 
 - Paper tone: warm white, ivory, light gray, old-paper yellow, pale khaki, or light kraft beige.
 - Cluster position: center-high, center-low, left-middle, right-middle, lower-left third, upper-right third, or a deliberate offset from the center axis.
-- Anchor: faded photo, clipping, flat silhouette, solid ink block, printed illustration, specimen, translucent overlay, abstract texture window, or typography-led form.
-- Structure: single anchor, dual panel, overlapping fragments, irregular cutout, orbiting marks, or type-led composition.
+- Focal element: faded photo, clipping, flat silhouette, solid ink block, printed illustration, specimen, translucent overlay, abstract texture window, or typography-led form.
+- Structure: single focal element, dual panel, overlapping fragments, irregular cutout, orbiting marks, or type-led composition.
 - Typography distribution: edge-pressed phrase, archive microtext, diagonal fragments, scattered letters, text inside a block, ghost text, or nearly textless caption.
 - Decorative marks: fine line, dashed line, tiny arrow, transparent rectangle, dot group, registration mark, or one hand-drawn curve.
 - Mood: quiet, summer, solitude, childhood, seaside, afternoon, night, memory, or slight surrealism.

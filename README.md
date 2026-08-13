@@ -15,7 +15,7 @@
   <li>
     <a href="skills/gc-minimal-zine-poster-v0-1"><strong>gc-minimal-zine-poster-v0-1</strong></a><br>
     根据主题、语句、物件、情绪或内容简报，生成留白克制、带旧纸质感的极简 Zine 编辑海报提示词与位图图像<br>
-    <sub>同步时间：2026-08-10 06:33 · 来源：<a href="https://github.com/LiamGvchi/gc-minimal-zine-poster">LiamGvchi/gc-minimal-zine-poster</a></sub>
+    <sub>同步时间：2026-08-14 00:57 · 来源：<a href="https://github.com/LiamGvchi/gc-minimal-zine-poster">LiamGvchi/gc-minimal-zine-poster</a></sub>
   </li>
 </ul>
 

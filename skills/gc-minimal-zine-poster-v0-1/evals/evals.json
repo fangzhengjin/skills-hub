@@ -4,13 +4,13 @@
     {
       "id": 1,
       "prompt": "用 $gc-minimal-zine-poster-v0-3 做一张关于‘错过的夏天’的海报，别再用居中小照片加蓝点。",
-      "expected_output": "Uses Generate Mode, derives one imageable metaphor, chooses a non-default layout and anchor treatment, generates a raster image, inspects it at thumbnail scale, and returns the image, four-paragraph prompt, recipe, and concise interpretation.",
+      "expected_output": "Uses Generate Mode, derives one imageable metaphor, chooses a non-default layout and focal-element treatment, generates a raster image, inspects it at thumbnail scale, and returns the image, four-paragraph prompt, recipe, and concise interpretation.",
       "files": []
     },
     {
       "id": 2,
       "prompt": "把这篇关于人与人逐渐疏远的文章做成一张极简纸感海报。",
-      "expected_output": "Reduces the article to one visual relation instead of illustrating every point, preserves 70%-90% paper space and one clear high-chroma anchor, generates and checks the image, and reports the final prompt and recipe.",
+      "expected_output": "Reduces the article to one visual relation instead of illustrating every point, preserves 70%-90% paper space and one clear high-chroma color accent, generates and checks the image, and reports the final prompt and recipe.",
       "files": []
     },
     {
@@ -48,6 +48,12 @@
       "id": 7,
       "prompt": "只参考这张海报的排版和纸张质感，做一个关于雨天的全新海报。",
       "expected_output": "Treats the supplied poster as a reference image with Low preservation, inspects its layout and paper traits, creates a new rain subject and composition, does not preserve or reproduce the source subject or wording, and reports the reference-only role.",
+      "files": []
+    },
+    {
+      "id": 8,
+      "prompt": "做一张关于‘迟迟没有寄出的信’的极简纸感海报，用一块鲜红色制造视觉重心。",
+      "expected_output": "Compiles a four-paragraph generation prompt that names the concrete focal element and the physical carrier of the red color, never introduces an unrelated maritime symbol or generic icon, generates the poster, and checks the actual raster for that failure before returning it.",
       "files": []
     }
   ]
