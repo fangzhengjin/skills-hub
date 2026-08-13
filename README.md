@@ -46,6 +46,11 @@
     保留真实照片并在下方纸面生成源自场景的生命感余像海报<br>
     <sub>同步时间：2026-08-13 00:53 · 来源：<a href="https://github.com/wnby/paper-spirit-zine/tree/HEAD/skills/paper-spirit-zine">wnby/paper-spirit-zine</a></sub>
   </li>
+  <li>
+    <a href="skills/surreal-pop-collage"><strong>surreal-pop-collage</strong></a><br>
+    将照片主体去色保留为现实锚，并以平涂色形和单一巨物重构超现实波普拼贴画<br>
+    <sub>同步时间：2026-08-13 10:12 · 来源：<a href="https://github.com/2998980-hue/surreal-pop-collage">2998980-hue/surreal-pop-collage</a></sub>
+  </li>
 </ul>
 
 <h3>照片重绘与重构</h3>
