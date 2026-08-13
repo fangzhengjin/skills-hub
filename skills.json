@@ -87,6 +87,13 @@
       "repository": "https://github.com/dacnay816y62-hub/cinema-dna-21x9x3",
       "path": ".",
       "description": "将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面"
+    },
+    {
+      "name": "fantasy-life-force-portrait-photography",
+      "category": "照片重绘与重构",
+      "repository": "https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography",
+      "path": ".",
+      "description": "将普通人像照片或主题转化为色彩鲜明、镜头亲密的生命感摄影作品与图像生成编辑方案"
     }
   ]
 }
