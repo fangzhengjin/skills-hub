@@ -24,7 +24,7 @@
   <li>
     <a href="skills/photo-abstract-editorial"><strong>photo-abstract-editorial</strong></a><br>
     保留上传照片原貌，并组合从照片提炼的抽象记忆面板与诗意英文标题，生成竖版编辑作品<br>
-    <sub>同步时间：2026-08-10 06:33 · 来源：<a href="https://github.com/ZzzLc0405/photo-abstract-editorial">ZzzLc0405/photo-abstract-editorial</a></sub>
+    <sub>同步时间：2026-08-13 19:01 · 来源：<a href="https://github.com/ZzzLc0405/photo-abstract-editorial">ZzzLc0405/photo-abstract-editorial</a></sub>
   </li>
   <li>
     <a href="skills/scenes-gathered-zine-v1-3"><strong>scenes-gathered-zine-v1-3</strong></a><br>
