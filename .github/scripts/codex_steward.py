@@ -81,14 +81,27 @@ def _gh_json(endpoint, *, method="GET", fields=None):
 
 def _pull_files(repository, pr_number):
     """分页读取 PR 的全部变更文件。"""
-    result = _run(
-        [
-            "gh", "api", "--paginate", "--slurp",
-            f"repos/{repository}/pulls/{pr_number}/files?per_page=100",
-        ],
-        capture=True,
-    )
-    return [item for page in json.loads(result.stdout) for item in page]
+    command = [
+        "gh", "api", "--paginate", "--slurp",
+        f"repos/{repository}/pulls/{pr_number}/files?per_page=100",
+    ]
+    for attempt in range(3):
+        try:
+            result = _run(command, capture=True)
+            return [item for page in json.loads(result.stdout) for item in page]
+        except subprocess.CalledProcessError as error:
+            delay = _github_retry_delay(error, attempt)
+            if delay is None:
+                raise
+            time.sleep(delay)
+
+
+def _github_retry_delay(error, attempt):
+    """仅为 GitHub 临时 5xx 返回指数退避秒数。"""
+    details = f"{error.stderr or ''}\n{error.stdout or ''}"
+    if attempt >= 2 or not re.search(r"\bHTTP 5\d{2}\b", details):
+        return None
+    return 2 ** attempt
 
 
 def _publish_review_status(repository, sha):
@@ -1217,6 +1230,20 @@ def self_check():
     assert _format_error(command_error) == "> GitHub 拒绝请求\n> 请检查仓库权限"
     command_error.stderr = None
     assert _format_error(command_error) == "> 命令执行失败（退出码 1）"
+    transient_error = subprocess.CalledProcessError(
+        1,
+        ["gh", "api"],
+        stderr="gh: diff temporarily unavailable (HTTP 500)",
+    )
+    assert _github_retry_delay(transient_error, 0) == 1
+    assert _github_retry_delay(transient_error, 1) == 2
+    assert _github_retry_delay(transient_error, 2) is None
+    permanent_error = subprocess.CalledProcessError(
+        1,
+        ["gh", "api"],
+        stderr="gh: resource not found (HTTP 404)",
+    )
+    assert _github_retry_delay(permanent_error, 0) is None
     collection_paths = {
         "sources/new-skill.json",
         "skills/new-skill/SKILL.md",
