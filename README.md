@@ -99,6 +99,11 @@
     将上传照片蒸馏为不保留原始摄影像素的极简艺术纸刊插画，以情绪张力、视觉隐喻、留白、结构性色彩和自由文字重构场景<br>
     <sub>同步时间：2026-08-12 13:38 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/scene-distillation-zine-v1-3">Zeejay0/gathered-scenes-zine-skill</a></sub>
   </li>
+  <li>
+    <a href="skills/street-photo-illustration-skill"><strong>street-photo-illustration-skill</strong></a><br>
+    根据街拍、旅行或生活照片将人物替换为保留环境与姿态的黑白或彩色编辑插画<br>
+    <sub>同步时间：2026-08-16 05:35 · 来源：<a href="https://github.com/dacnay816y62-hub/street-photo-illustration-skill">dacnay816y62-hub/street-photo-illustration-skill</a></sub>
+  </li>
 </ul>
 <!-- skills:end -->
 
