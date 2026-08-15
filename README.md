@@ -52,6 +52,11 @@
     <sub>同步时间：2026-08-12 13:25 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
   </li>
   <li>
+    <a href="skills/chinese-style-poster-skill"><strong>chinese-style-poster-skill</strong></a><br>
+    根据主题文案或图像内容生成当代中式海报方向与图像生成提示词<br>
+    <sub>同步时间：2026-08-16 05:52 · 来源：<a href="https://github.com/dacnay816y62-hub/chinese-poster-skill/tree/HEAD/chinese-style-poster-skill">dacnay816y62-hub/chinese-poster-skill</a></sub>
+  </li>
+  <li>
     <a href="skills/cinema-dna-21x9x3"><strong>cinema-dna-21x9x3</strong></a><br>
     将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面<br>
     <sub>同步时间：2026-08-13 22:58 · 来源：<a href="https://github.com/dacnay816y62-hub/cinema-dna-21x9x3">dacnay816y62-hub/cinema-dna-21x9x3</a></sub>
