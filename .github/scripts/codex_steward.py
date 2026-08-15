@@ -150,13 +150,9 @@ def _pull_is_behind_default(repository, pull):
     return comparison["behind_by"] > 0
 
 
-def _updated_head_is_base_merge(previous_sha, parent_shas, base_parent_behind):
-    """确认更新提交只合并了原审查提交和默认分支历史。"""
-    return (
-        len(parent_shas) == 2
-        and previous_sha in parent_shas
-        and base_parent_behind == 0
-    )
+def _updated_head_is_rebased(parent_shas, behind_default):
+    """确认更新后的 Head 没有 merge 节点且已基于最新默认分支。"""
+    return len(parent_shas) == 1 and not behind_default
 
 
 def _can_retry_merge(previous_pull, current_pull, behind_default):
@@ -219,7 +215,7 @@ def _controlled_skill_names(branch, changed_paths):
 
 
 def _update_pull_branch(repository, pr_number, pull):
-    """必要时把最新默认分支合入受控 PR，并等待 GitHub 完成更新。"""
+    """必要时把受控 PR rebase 到最新默认分支，并等待 GitHub 完成更新。"""
     if not _pull_is_behind_default(repository, pull):
         return pull
     head_repository = (pull["head"].get("repo") or {}).get("full_name")
@@ -230,10 +226,12 @@ def _update_pull_branch(repository, pr_number, pull):
         raise ValueError("PR 与最新默认分支冲突，请重新审查")
 
     previous_sha = pull["head"]["sha"]
-    _gh_json(
-        f"repos/{repository}/pulls/{pr_number}/update-branch",
-        method="PUT",
-        fields={"expected_head_sha": previous_sha},
+    _run(
+        [
+            "gh", "pr", "update-branch", str(pr_number),
+            "--repo", repository, "--rebase",
+        ],
+        capture=True,
     )
     for _ in range(30):
         current = _gh_json(f"repos/{repository}/pulls/{pr_number}")
@@ -242,19 +240,10 @@ def _update_pull_branch(repository, pr_number, pull):
                 f"repos/{repository}/git/commits/{current['head']['sha']}"
             )
             parents = [parent["sha"] for parent in commit["parents"]]
-            base_parents = [sha for sha in parents if sha != previous_sha]
-            base_parent_behind = 1
-            if len(base_parents) == 1:
-                default_sha = _gh_json(
-                    f"repos/{repository}/branches/{pull['base']['ref']}"
-                )["commit"]["sha"]
-                base_parent_behind = _gh_json(
-                    f"repos/{repository}/compare/{base_parents[0]}...{default_sha}"
-                )["behind_by"]
-            if not _updated_head_is_base_merge(
-                previous_sha, parents, base_parent_behind
+            if not _updated_head_is_rebased(
+                parents, _pull_is_behind_default(repository, current)
             ):
-                raise ValueError("PR 更新后包含非默认分支内容，请重新审查")
+                raise ValueError("PR rebase 后仍落后默认分支或包含 merge 节点")
             return current
         time.sleep(2)
     raise TimeoutError("等待 GitHub 更新 PR 分支超时")
@@ -1272,9 +1261,9 @@ def self_check():
     assert not _branch_delete_failed(0, "")
     assert not _branch_delete_failed(1, "Reference does not exist")
     assert _branch_delete_failed(1, "GitHub API unavailable")
-    assert _updated_head_is_base_merge("reviewed", ["reviewed", "base"], 0)
-    assert not _updated_head_is_base_merge("reviewed", ["reviewed"], 0)
-    assert not _updated_head_is_base_merge("reviewed", ["reviewed", "other"], 1)
+    assert _updated_head_is_rebased(["base"], False)
+    assert not _updated_head_is_rebased(["reviewed", "base"], False)
+    assert not _updated_head_is_rebased(["base"], True)
     reviewed_pull = {"state": "open", "head": {"sha": "reviewed"}}
     assert _can_retry_merge(reviewed_pull, reviewed_pull, True)
     changed_pull = {"state": "open", "head": {"sha": "changed"}}
