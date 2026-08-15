@@ -1,0 +1,14 @@
+interface:
+  display_name: Street Photo Illustration
+  short_description: Turn people in real photos into editorial illustrations
+  default_prompt: Use $street-photo-illustration to transform the people in this photo
+    while keeping the real environment unchanged.
+  icon_small: assets/icon.svg
+  icon_large: assets/icon.svg
+policy:
+  products:
+  - chatgpt
+  - codex
+  - api
+  - atlas
+  allow_implicit_invocation: true
