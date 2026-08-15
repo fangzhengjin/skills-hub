@@ -1,0 +1,6 @@
+.DS_Store
+.env
+.env.*
+auth.json
+generated_images/
+outputs/

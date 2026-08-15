@@ -1,0 +1,21 @@
+name: Skill 收录申请
+description: 提交一个希望 Skills Hub 收录的上游 Skill
+title: "[Skill 收录] "
+body:
+  - type: input
+    id: repository
+    attributes:
+      label: 上游仓库
+      description: Skill 所在的 GitHub 仓库根地址
+      placeholder: https://github.com/owner/repository
+    validations:
+      required: true
+
+  - type: input
+    id: path
+    attributes:
+      label: Skill 路径
+      description: 位于仓库根目录时填写 `.`
+      value: .
+    validations:
+      required: true

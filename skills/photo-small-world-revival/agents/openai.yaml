@@ -1,0 +1,4 @@
+interface:
+  display_name: "Photo Small World Revival"
+  short_description: "Turn snapshots into sparse, vivid hand-drawn pages"
+  default_prompt: "Use $photo-small-world-revival to reinterpret this snapshot as a small-world illustrated page."

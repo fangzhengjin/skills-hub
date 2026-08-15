@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "action",
+    "recommendation",
+    "summary",
+    "comment",
+    "candidate",
+    "pr_number",
+    "related_issues",
+    "expected_head_sha"
+  ],
+  "properties": {
+    "action": {
+      "type": "string",
+      "enum": ["comment", "create_pr", "reject", "merge"]
+    },
+    "recommendation": {
+      "type": "string",
+      "enum": [
+        "accept",
+        "request_changes",
+        "wait_for_pr",
+        "reject",
+        "merge",
+        "none"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1000
+    },
+    "comment": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 30000
+    },
+    "candidate": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["name", "category", "repository", "path", "description"],
+          "properties": {
+            "name": {"type": "string"},
+            "category": {"type": "string"},
+            "repository": {"type": "string"},
+            "path": {"type": "string"},
+            "description": {"type": "string"}
+          }
+        },
+        {"type": "null"}
+      ]
+    },
+    "pr_number": {
+      "anyOf": [{"type": "integer", "minimum": 1}, {"type": "null"}]
+    },
+    "related_issues": {
+      "type": "array",
+      "items": {"type": "integer", "minimum": 1},
+      "maxItems": 20
+    },
+    "expected_head_sha": {
+      "anyOf": [
+        {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+        {"type": "null"}
+      ]
+    }
+  }
+}

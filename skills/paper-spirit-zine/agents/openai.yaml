@@ -1,0 +1,4 @@
+interface:
+  display_name: "Paper Spirit Zine"
+  short_description: "Turn photos into tactile paper afterimages."
+  default_prompt: "Use $paper-spirit-zine to turn this photo into a tactile zine poster where the original photo stays primary and any living form emerges subtly from the scene."

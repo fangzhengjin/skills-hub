@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cinema DNA 21:9 x 3"
+  short_description: "Create cinematic 21:9 triptychs with optional title and poster-cover systems"
+  default_prompt: "Turn this subject, story, place, product, person, or reference image into three connected 21:9 cinematic film-still prompts. Only when the user explicitly asks for naming, a poster, a cover, or a visual system, add the optional title, theme-poster, and cover-system stage."

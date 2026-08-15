@@ -1,0 +1,89 @@
+name: Sync skills
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 4,10,16,22 * * *"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: sync-skills
+  cancel-in-progress: false
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+
+      - name: Sync skills and open review PR
+        id: publish
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          GH_TOKEN: ${{ github.token }}
+          SYNC_BRANCH: automation/sync-skills
+          REVIEW_LABEL: codex-review
+        run: |
+          set -euo pipefail
+
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing_pr" ]; then
+            pr_url="$(gh pr view "$existing_pr" --repo "$GITHUB_REPOSITORY" --json url --jq '.url')"
+            echo "同步已跳过：等待 PR #$existing_pr 处理完成"
+            {
+              echo "### 同步已暂停"
+              echo ""
+              echo "存在尚未处理的同步 PR：[$existing_pr]($pr_url)"
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          git fetch --no-tags origin "refs/heads/$SYNC_BRANCH:refs/remotes/origin/$SYNC_BRANCH" || true
+          git switch --create "$SYNC_BRANCH"
+
+          python3 .github/scripts/sync_skills.py --no-readme
+          git add -- sources skills
+          if git diff --cached --quiet; then
+            echo "No skill changes"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: sync skills"
+          git push --force-with-lease origin "HEAD:$SYNC_BRANCH"
+
+          gh label create "$REVIEW_LABEL" --repo "$GITHUB_REPOSITORY" --color "BFD4F2" --description "等待自动审查的 Skill 变更" --force
+          gh pr create --repo "$GITHUB_REPOSITORY" --base "$DEFAULT_BRANCH" --head "$SYNC_BRANCH" --title "chore: sync skills" --body "同步脚本检测到上游 Skill 内容变化。自动审查与确定性校验通过后将自动合并。"
+          existing_pr="$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --head "$SYNC_BRANCH" --json number --jq '.[0].number // empty')"
+          if [ -z "$existing_pr" ]; then
+            echo "Failed to locate sync PR" >&2
+            exit 1
+          fi
+          gh pr edit "$existing_pr" --repo "$GITHUB_REPOSITORY" --add-label "$REVIEW_LABEL"
+          echo "pr_number=$existing_pr" >> "$GITHUB_OUTPUT"
+          gh workflow run codex-review.yml --repo "$GITHUB_REPOSITORY" --ref "$DEFAULT_BRANCH" -f "pr_number=$existing_pr"
+
+      - name: Report review dispatch failure
+        if: failure() && steps.publish.outputs.pr_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          PR_NUMBER: ${{ steps.publish.outputs.pr_number }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh pr comment "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --body "@$OWNER
+
+          ### 自动审查未启动
+
+          请检查本次运行并重试：$RUN_URL"
