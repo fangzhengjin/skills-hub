@@ -49,7 +49,7 @@
   <li>
     <a href="skills/antibes-holiday"><strong>antibes-holiday</strong></a><br>
     根据概念或视觉参考生成松弛黑色钢笔插画、叙事场景与标志探索<br>
-    <sub>同步时间：2026-08-12 13:25 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
+    <sub>同步时间：2026-08-17 00:27 · 来源：<a href="https://github.com/haorantang97/antibes-holiday/tree/HEAD/plugins/antibes-holiday/skills/antibes-holiday">haorantang97/antibes-holiday</a></sub>
   </li>
   <li>
     <a href="skills/chinese-style-poster-skill"><strong>chinese-style-poster-skill</strong></a><br>
