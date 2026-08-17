@@ -139,7 +139,7 @@ photo-abstract-editorial/
 **如果这个项目对你有帮助，欢迎 Star ⭐ 支持！**
 
 </div>
-请作者喝杯咖啡（token）
+请作者充点Token（coffee）
 <p align="center">
   <img src="./pay/AliPay.jpg" width="32%">
   <img src="./pay/WechatPay.jpg" width="32%">
