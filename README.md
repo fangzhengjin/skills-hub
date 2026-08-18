@@ -13,6 +13,11 @@
 <h3>保留原始照片</h3>
 <ul>
   <li>
+    <a href="skills/morandi-cinematic-poster-zeejay"><strong>morandi-cinematic-poster-zeejay</strong></a><br>
+    将个人照片转化为保留原始摄影的莫兰迪电影感文字海报<br>
+    <sub>同步时间：2026-08-18 22:12 · 来源：<a href="https://github.com/Zeejay0/gathered-scenes-zine-skill/tree/HEAD/skills/morandi-cinematic-poster-zeejay">Zeejay0/gathered-scenes-zine-skill</a></sub>
+  </li>
+  <li>
     <a href="skills/paper-spirit-zine"><strong>paper-spirit-zine</strong></a><br>
     保留真实照片并在下方纸面生成源自场景的生命感余像海报<br>
     <sub>同步时间：2026-08-13 00:53 · 来源：<a href="https://github.com/wnby/paper-spirit-zine/tree/HEAD/skills/paper-spirit-zine">wnby/paper-spirit-zine</a></sub>
