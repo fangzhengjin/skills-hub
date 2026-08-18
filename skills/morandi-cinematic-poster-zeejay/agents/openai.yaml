@@ -1,0 +1,4 @@
+interface:
+  display_name: "Morandi Cinematic Poster · Zeejay"
+  short_description: "把个人照片转成无星形、纯文字驱动的莫兰迪电影感海报"
+  default_prompt: "Use $morandi-cinematic-poster-zeejay to transform this personal photograph into a source-faithful cinematic poster with original film typography, adaptive fictional credits, and no decorative symbols."
