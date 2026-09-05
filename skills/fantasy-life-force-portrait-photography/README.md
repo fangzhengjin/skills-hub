@@ -1,19 +1,55 @@
-# Fantasy 生命感人像摄影 Skill
+# Fantasy 生命感人像摄影
 
-拆解了 100 张照片，我终于找到了「生命感」的生成方式。
+**FANTASY / 梵想美学 · 摄影与照片转译**
 
-这一次，完整开源。
+围绕人物状态、事件、亲密镜头和光色关系，升级生活照或构建原创电影化人像。
 
-这个 Skill 用来把普通游客照、生活随拍、手机废片或参考人像，转化为色彩鲜明、镜头亲密、真实鲜活、适合社交媒体发布的高级生命感人像摄影作品；也可以从零生成原创生命感人像样片、摄影提示词、风格方案和图像编辑指令。
+**[快速开始](#start)** · **[下载与安装](#install)** · **[完整规则](SKILL.md)** · **[全部视觉 Skills](https://github.com/dacnay816y62-hub?tab=repositories)**
+
+| 视觉示例 01 | 视觉示例 02 |
+| :---: | :---: |
+| ![Fantasy 生命感人像摄影 · 示例 1](assets/atmosphere/rooftop-before.jpg) | ![Fantasy 生命感人像摄影 · 示例 2](assets/atmosphere/rooftop-after.jpg) |
+
+<a id="start"></a>
+
+## 一分钟开始
+
+| 你提供 | 这套 Skill 组织的交付 |
+| --- | --- |
+| 生活照、参考人像或一个拍摄主题 | 保留身份的照片升级，或原创人像方向与样片 |
+
+```text
+用 $fantasy-life-force-portrait-photography 处理这张生活照。保留人物身份、表情、服装与原场景，重新组织光线和景深，让人物状态自然，面部干净清透。
+```
+
+**生成说明：** Skill 组织设计判断、提示词与执行流程；图片由当前环境中可用的图像工具生成或编辑。示例用于理解视觉方向，具体来源以本仓库记录为准，不能据此保证每次得到相同效果。
+
+<a id="install"></a>
+
+## 下载与安装
+
+**[下载当前分支 ZIP](https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography/archive/refs/heads/main.zip)** · **[阅读 Skill 规则](SKILL.md)**
+
+1. 下载并解压仓库。
+2. 将仓库根目录（包含 `SKILL.md`）放入当前助手支持的技能目录。
+3. 安装文件夹命名为 **`fantasy-life-force-portrait-photography`**，确保入口是 `fantasy-life-force-portrait-photography/SKILL.md`。
+4. 在支持技能调用的会话中使用 **`$fantasy-life-force-portrait-photography`**。如果列表未刷新，新开一个任务。
+
+Codex CLI / IDE 的用户级目录是 `~/.agents/skills/`，项目级目录是 `.agents/skills/`；Windows 用户目录可写为 `%USERPROFILE%\.agents\skills\`。以 [OpenAI 官方安装说明](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills) 为准。ChatGPT 与其他宿主请按各自的技能加载方式使用。
+
+仓库名与调用名可能不同，以上以 `SKILL.md` 中的名称为准。安装不包含图像服务、账户或生成额度；实际出图取决于你使用的环境。
+
+---
 
 ## 模式总览
 
-这个 Skill 主要有两个入口：
+常用入口是照片升级和原创样片；核心规则还把氛围增强单列为 MODE C：
 
 | 模式 | 输入 | 适合做什么 | 输出 |
 | --- | --- | --- | --- |
 | MODE A｜普通照片升级 | 一张普通照片、游客照、生活随拍或手机废片 | 保留原人物，把照片改得更有光影、景深、情绪和摄影完成度 | 图像编辑方向、重绘提示词、氛围感大片方案 |
 | MODE B｜最高标准原创样片 | 一个主题、人物设定、场景或风格关键词 | 不依赖原图，从零生成原创生命感人像样片 | 原创人像提示词、成组样片方案、作品集方向 |
+| MODE C｜氛围增强 | 一张希望保留人物与事件的生活照 | 重点调整光线、景深与环境气氛 | 保留身份和事件的氛围感图像编辑方向 |
 
 ## MODE A｜普通照片升级
 
@@ -76,7 +112,7 @@ MODE B 不需要上传原图。
 
 ### MODE B 示例图
 
-MODE B 的默认审美不是街头纪实，而是“唯美的电影化人像大片”：默认中国/东亚人物，高饱和、高对比、镜头效果明确，人物漂亮但不油腻，画面有电影情境和光学记忆点。面部必须干净清透，皮肤是柔润哑光，不是油亮反光；不能生成外国人、欧美广告模特脸、脏脸、油亮媚态或廉价网红修图。
+MODE B 的默认审美不是街头纪实，而是“唯美的电影化人像大片”：默认中国/东亚人物，高饱和、高对比、镜头效果明确，人物漂亮但不油腻，画面有电影情境和光学记忆点。面部必须干净清透，皮肤是柔润哑光，不是油亮反光；人物地域与面貌以当前用户要求为准；避免脏脸、过量油光和模板化网红修图。
 
 新版 MODE B 会刻意避开几类容易跑偏的结果：
 
@@ -251,3 +287,9 @@ git clone https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photog
 AI 生成照片时，到底应该先生成「好看」，还是先生成「活着」？
 
 拿一张你觉得很普通的照片来试试，看看它还能不能被重新看见。
+
+## FANTASY / 梵想美学
+
+**让想象先被看见。** 将视觉判断与创作流程整理成可以继续使用的方法。
+
+**[浏览全部视觉 Skills](https://github.com/dacnay816y62-hub?tab=repositories)** · [Character Casting Studio](https://github.com/dacnay816y62-hub/character-casting-studio-skill) · [Street Photo Illustration](https://github.com/dacnay816y62-hub/street-photo-illustration-skill)

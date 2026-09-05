@@ -1,12 +1,45 @@
-# 废片焕新 / Photo Revival
+# 废片焕新 · Photo Revival
 
-把普通照片、生活随手拍、废片和日常物件，重新画成一页白纸上的诗性手绘插画。
+**FANTASY / 梵想美学 · 摄影与照片转译**
 
-`photo-revival` 是一个 Codex Skill。它不是给照片套滤镜，而是把照片当成“记忆证据”：保留主体、空间关系和情绪，再用新的手绘插画语言重新生成。
+把生活照片转译成白纸上的小幅手绘，保留记忆点，以大量留白与少量诗性文字重新组织画面。
 
-![License](https://img.shields.io/badge/license-MIT-111111)
-![Codex Skill](https://img.shields.io/badge/Codex%20Skill-photo--revival-4f46e5)
-![Format](https://img.shields.io/badge/default-3%3A4%20vertical-f97316)
+**[快速开始](#start)** · **[下载与安装](#install)** · **[完整规则](SKILL.md)** · **[全部视觉 Skills](https://github.com/dacnay816y62-hub?tab=repositories)**
+
+| 视觉示例 01 | 视觉示例 02 |
+| :---: | :---: |
+| ![废片焕新 · Photo Revival · 示例 1](examples/01_moon_gate.png) | ![废片焕新 · Photo Revival · 示例 2](examples/06_cat_bed_paper.png) |
+
+<a id="start"></a>
+
+## 一分钟开始
+
+| 你提供 | 这套 Skill 组织的交付 |
+| --- | --- |
+| 生活随拍、物件、街角或旅行照片 | 3:4 白纸手绘插画页，主体小、留白多 |
+
+```text
+用 $photo-revival 把这张照片重新画成白纸上的小幅水彩手绘。保留主体与空间关系，主体约占整页 10–16%，文字只留一句很小的中文批注。
+```
+
+**生成说明：** Skill 组织设计判断、提示词与执行流程；图片由当前环境中可用的图像工具生成或编辑。示例用于理解视觉方向，具体来源以本仓库记录为准，不能据此保证每次得到相同效果。
+
+<a id="install"></a>
+
+## 下载与安装
+
+**[下载当前分支 ZIP](https://github.com/dacnay816y62-hub/photo-revival/archive/refs/heads/main.zip)** · **[阅读 Skill 规则](SKILL.md)**
+
+1. 下载并解压仓库。
+2. 将仓库根目录（包含 `SKILL.md`）放入当前助手支持的技能目录。
+3. 安装文件夹命名为 **`photo-revival`**，确保入口是 `photo-revival/SKILL.md`。
+4. 在支持技能调用的会话中使用 **`$photo-revival`**。如果列表未刷新，新开一个任务。
+
+Codex CLI / IDE 的用户级目录是 `~/.agents/skills/`，项目级目录是 `.agents/skills/`；Windows 用户目录可写为 `%USERPROFILE%\.agents\skills\`。以 [OpenAI 官方安装说明](https://learn.chatgpt.com/docs/build-skills#where-codex-loads-local-skills) 为准。ChatGPT 与其他宿主请按各自的技能加载方式使用。
+
+仓库名与调用名可能不同，以上以 `SKILL.md` 中的名称为准。安装不包含图像服务、账户或生成额度；实际出图取决于你使用的环境。
+
+---
 
 ## 核心效果
 
@@ -41,23 +74,6 @@
 ## 中文操作指南
 
 下面是从安装到出图的一套完整中文流程。
-
-## 安装方式
-
-把这个仓库放到 Codex 的 skills 目录下即可。
-
-### Windows
-
-```powershell
-cd $env:USERPROFILE\.codex\skills
-git clone https://github.com/dacnay816y62-hub/photo-revival.git
-```
-
-如果你的 Codex skills 目录在别的位置，也可以直接把仓库复制进去，目录名保持为：
-
-```text
-photo-revival
-```
 
 ## 基础用法
 
@@ -197,3 +213,9 @@ The blank paper field remains white.
 ## License
 
 MIT
+
+## FANTASY / 梵想美学
+
+**让想象先被看见。** 将视觉判断与创作流程整理成可以继续使用的方法。
+
+**[浏览全部视觉 Skills](https://github.com/dacnay816y62-hub?tab=repositories)** · [Street Photo Illustration](https://github.com/dacnay816y62-hub/street-photo-illustration-skill) · [FANTASY Minimal Magazine](https://github.com/dacnay816y62-hub/FANTASY-Minimal-Magazine)

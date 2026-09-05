@@ -11,7 +11,8 @@ Use this skill to translate a user-provided subject, copy, image, cultural objec
 
 This skill is host-agnostic. It can be used in Codex, ChatGPT, API workflows, or another host that supports image generation.
 
-- In Codex, use the built-in Imagen v2 image capability directly. No separate API key or external image service is required.
+- In Codex, use the image-generation tool actually available in the current host. Do not assume a fixed model name, service, account requirement or quota.
+- If no image backend is available, provide the design direction and generation prompt, and state that no image was generated. Prompt-only requests remain text-only.
 - In ChatGPT or another image-capable host, use that host's native image workflow.
 - The Python batch scripts in this repository are optional utilities for JSONL jobs, contact sheets, and custom external backends. Their backend credentials are not a requirement of this skill.
 
