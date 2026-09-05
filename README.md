@@ -59,12 +59,12 @@
   <li>
     <a href="skills/chinese-style-poster-skill"><strong>chinese-style-poster-skill</strong></a><br>
     根据主题文案或图像内容生成当代中式海报方向与图像生成提示词<br>
-    <sub>同步时间：2026-08-16 05:52 · 来源：<a href="https://github.com/dacnay816y62-hub/chinese-poster-skill/tree/HEAD/chinese-style-poster-skill">dacnay816y62-hub/chinese-poster-skill</a></sub>
+    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/chinese-poster-skill/tree/HEAD/chinese-style-poster-skill">dacnay816y62-hub/chinese-poster-skill</a></sub>
   </li>
   <li>
     <a href="skills/cinema-dna-21x9x3"><strong>cinema-dna-21x9x3</strong></a><br>
     将主题或剧情转译为真实电影感的21:9单帧或三联叙事镜头，并按需生成片名、主题海报与视觉体系封面<br>
-    <sub>同步时间：2026-09-02 03:15 · 来源：<a href="https://github.com/dacnay816y62-hub/cinema-dna-21x9x3">dacnay816y62-hub/cinema-dna-21x9x3</a></sub>
+    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/cinema-dna-21x9x3">dacnay816y62-hub/cinema-dna-21x9x3</a></sub>
   </li>
   <li>
     <a href="skills/fantasy-photography-simulation"><strong>fantasy-photography-simulation</strong></a><br>
@@ -92,12 +92,12 @@
   <li>
     <a href="skills/fantasy-life-force-portrait-photography"><strong>fantasy-life-force-portrait-photography</strong></a><br>
     将普通人像照片或主题转化为色彩鲜明、镜头亲密的生命感摄影作品与图像生成编辑方案<br>
-    <sub>同步时间：2026-08-14 01:20 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography">dacnay816y62-hub/fantasy-life-force-portrait-photography</a></sub>
+    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography">dacnay816y62-hub/fantasy-life-force-portrait-photography</a></sub>
   </li>
   <li>
     <a href="skills/photo-revival"><strong>photo-revival</strong></a><br>
     将普通照片或日常随手拍重新绘制成大面积白纸留白、局部鲜明色彩和微小手写文字的诗性手绘插画<br>
-    <sub>同步时间：2026-08-04 23:37 · 来源：<a href="https://github.com/dacnay816y62-hub/photo-revival">dacnay816y62-hub/photo-revival</a></sub>
+    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/photo-revival">dacnay816y62-hub/photo-revival</a></sub>
   </li>
   <li>
     <a href="skills/photo-small-world-revival"><strong>photo-small-world-revival</strong></a><br>
@@ -112,7 +112,7 @@
   <li>
     <a href="skills/street-photo-illustration-skill"><strong>street-photo-illustration-skill</strong></a><br>
     根据街拍、旅行或生活照片将人物替换为保留环境与姿态的黑白或彩色编辑插画<br>
-    <sub>同步时间：2026-08-16 05:35 · 来源：<a href="https://github.com/dacnay816y62-hub/street-photo-illustration-skill">dacnay816y62-hub/street-photo-illustration-skill</a></sub>
+    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/street-photo-illustration-skill">dacnay816y62-hub/street-photo-illustration-skill</a></sub>
   </li>
 </ul>
 <!-- skills:end -->
