@@ -1,12 +1,14 @@
 # CINEMA DNA
 
-### 电影静帧 · 三联叙事 · 九镜故事板
+**版本：3.1.1**
+
+### 电影静帧 · 三联叙事 · 九镜故事板 · 逐镜视频提示词
 
 **让每一个镜头都有理由，让画面之间发生故事。**
 
 从一句剧情、一个人物或一张参考图出发，建立摄影机的位置、人物与空间的关系、光线和色彩，再把它发展成可以连续观看的电影画面。
 
-**21:9 宽银幕方向 · 1 / 3 / 9 镜头 · 独立源图 · 连续性控制**
+**约 2.39:1 宽银幕 · 1 / 3 / 9 镜头 · 原画风保真 · 连续性控制 · 中文 TXT 交付**
 
 [快速开始](#快速开始) · [三种输出模式](#三种输出模式) · [工作流程](#工作流程) · [示例图库](#示例图库) · [安装与调用](#安装与调用) · [English](#english-overview)
 
@@ -22,15 +24,26 @@ Cinema DNA 把这个判断落实到可执行的镜头设计：人物正在做什
 
 **Skill 负责镜头与叙事设计、提示词和生成编排；图像模型负责逐镜生成；拼版工具负责组合已有镜头。** 它依赖所在环境实际提供的图像能力，本身不附带模型、API 密钥或视频生成服务。
 
+## 3.1.1 更新重点
+
+- **画风参考真正参与生成：** 要求保留原画风时，区分媒介、线条、色块和纹理，不再把“电影感”默认转成真人；“不能用原图作某一帧”不等于“不能输入原图作参考”。
+- **具象化角色可辨：** 区分意象、半成形和实体，分别核对角色身份与化形来源；用户要求角色出现时，不以模糊黑影代替。
+- **故事和空间按状态检查：** 身份与道具归属分开，已发生的交接不复位；单图背面和推测空间不冒充精确还原。
+- **逐镜视频动作：** 先辨认输入图是动作起始、中段还是结束，再写相机行为、主体动作、落点和切镜关系。未生成视频不宣称运镜已验证。
+- **直接使用的提示词：** 默认 TXT 与跟随用户语言的目录；中文项目提供逐镜短提示词和导演控制卡，可另附真实提交记录。
+- **轻量发布：** 保留六张压缩 JPG，不把新测试大图、用户原图和过程稿放进安装包。
+
+本轮来自实际分镜修正经验与规则自检，不是通用成功率或视频生成性能保证。
+
 ## 三种输出模式
 
 | 模式 | 适合什么 | 交付结构 |
 | --- | --- | --- |
 | **单帧 / Single Frame** | 先确定一个视觉方向或关键瞬间 | 1 张独立宽银幕画面 |
 | **三联 / Triptych** | 一个事件中的三次信息变化 | 3 张独立镜头 + 1 张纵向三联图 |
-| **九镜 / Nine-Shot Story** | 展开一个有选择、后果与连续动作的短场景 | 9 张独立镜头 + 3 张三联图 + 1 张 3×3 总览 |
+| **九镜 / Nine-Shot Story** | 展开连续动作、人物关系或一个完整短场景 | 9 张独立镜头 + 3 张三联图 + 1 张 3×3 总览 |
 
-未指定数量时通常使用三联；明确要求九镜、九宫格或需要更完整的故事推进时使用九镜。你指定的数量和交付形式优先。
+未指定数量时默认三联；明确要求九镜或九宫格时使用九镜，不因为“导演感”或转视频就自动扩镜。你指定的数量和交付形式优先。
 
 仓库名称中的 **21:9** 表示宽银幕方向，当前镜头提示词以 **约 2.39:1** 为默认目标。严格的 21:9 与 2.39:1 并不相等；有精确尺寸要求时请直接指定。九宫格中的每格仍是横向宽银幕镜头，整张总览不必是正方形。
 
@@ -65,6 +78,17 @@ Cinema DNA 把这个判断落实到可执行的镜头设计：人物正在做什
 只给精简的中文镜头说明与英文提示词，不生成图片。
 ```
 
+### 保留原画风，并交付视频运镜提示词
+
+```text
+使用 $cinema-dna-21x9x3，按上传图的手绘画风做九镜。
+参考只用于画风和人物身份，不要把原图裁切当某一帧。
+保留我已经认可的第一镜，补齐其余镜头，并检查角色与道具状态。
+用官方内置 Image Gen，不切换其他图像服务。
+交付中文文件夹、独立图、逐镜中文视频提示词和导演控制卡，提示词用 TXT，不要 MD。
+只做图片和提示词，不生成视频。
+```
+
 ### 只修一张失败镜头
 
 ```text
@@ -79,14 +103,14 @@ Cinema DNA 把这个判断落实到可执行的镜头设计：人物正在做什
 
 | 阶段 | 解决的问题 | 形成的依据 |
 | --- | --- | --- |
-| **明确事件** | 谁遇到了什么具体问题？ | 一句可拍摄的冲突，必要时补充选择与后果 |
-| **锁定连续性** | 什么内容不能在下一镜变掉？ | 人物、服装、关键道具、空间位置和光源清单 |
+| **明确事件** | 原故事发生了什么？ | 保留已给定事件、关系与结局，不强加冲突或代价 |
+| **锁定连续性** | 什么保持、什么随事件改变？ | 画风、身份与逐镜状态分开，记录道具归属和空间依据 |
 | **安排镜头** | 每一镜让观众多知道了什么？ | 动作、观看位置、构图、线索与前后变化 |
 | **逐镜生成** | 怎样保留单独修改的能力？ | 各自独立的源图与对应提示词 |
 | **检查与修正** | 哪一镜破坏了故事或身份？ | 对具体镜头补跑，保留已经成立的画面 |
 | **拼版交付** | 怎样让镜头按正确顺序被观看？ | 三联或九宫格，以及可继续使用的独立源图 |
 
-九镜通常按 **1–3 / 4–6 / 7–9** 分三批完成，每批返回后检查身份与空间关系。它不会要求图像模型直接在一张画布里画出九宫格。
+九镜可按 **1–3 / 4–6 / 7–9** 组织队列，但关键状态变化镜先验收，再生成依赖它的镜头。已认可且符合故事的镜头可以保留。分批与数量不是连续性证明；不会要求图像模型直接在一张画布里画出九宫格。
 
 ## 设计规则
 
@@ -98,10 +122,10 @@ Cinema DNA 把这个判断落实到可执行的镜头设计：人物正在做什
 | **每镜有信息变化** | 换角度之外，还要推进动作、关系或观众认知 |
 | **连续性有基准** | 用少量稳定特征锁定人、物与空间，避免装饰越多越容易漂移 |
 | **色彩有来源** | 颜色来自服装、墙体、天气与实景灯，而非统一滤镜 |
-| **质感有分寸** | 让皮肤、衣物和环境保留摄影感，减少均匀锐化、塑料高光与过量特效 |
+| **质感服从媒介** | 摄影保留可信材质，手绘保留原线条与色块；不以套电影滤镜替代画风保真 |
 | **结尾有余地** | 第三镜可以是人物反应、关系变化或继续运行的现场，不固定成空场物件 |
 
-九镜会检查规则、发现、选择、后果和代价之间的联系，并尝试“删掉这一镜会损失什么”的判断。具体执行规则见 [SKILL.md](SKILL.md) 与[九镜协议](references/nine-shot-story-protocol-v3.md)。
+九镜会检查原事件覆盖、人物身份、道具状态和镜头衔接；安静观察与必要过渡也可以成立，不强制增加发现、代价或反转。具体执行规则见 [SKILL.md](SKILL.md) 与[九镜协议](references/nine-shot-story-protocol-v3.md)。
 
 ## 示例图库
 
@@ -135,6 +159,14 @@ Cinema DNA 把这个判断落实到可执行的镜头设计：人物正在做什
 
 将解压后包含 `SKILL.md` 的文件夹放入所用助手的技能目录。当前仓库保留轻量 JPG 示例；旧版 Release 包含更大的历史图库。
 
+### 直接发给 Codex 的安装口令
+
+```text
+帮我从 https://github.com/dacnay816y62-hub/cinema-dna-21x9x3 安装或更新 Cinema DNA skill；如果已安装，先检查并保留本地自定义修改。
+```
+
+安装完成后，可直接说“用电影感 skill 做一组九镜，附中文视频运镜提示词”。
+
 ### Codex CLI
 
 已安装 Git 时，可直接克隆到技能目录。`--depth 1` 只下载当前历史深度，避免首次安装拉取全部旧图。
@@ -166,6 +198,13 @@ git clone --depth 1 https://github.com/dacnay816y62-hub/cinema-dna-21x9x3.git "$
 | 文件 | 用途 |
 | --- | --- |
 | [SKILL.md](SKILL.md) | 单帧、三联与九镜的核心执行规则 |
+| [画风保真](references/style-reference-fidelity.md) | 参考用途、原媒介保持与已批准校准帧 |
+| [剧情与状态](references/story-state-continuity.md) | 事件还原、实体化角色、道具归属 |
+| [资产与空间](references/asset-space-protocol.md) | 轴线、脚点、比例与未知区域 |
+| [视频运镜协议](references/video-motion-protocol.md) | 输入帧角色、主体动作、相机路径与切镜 |
+| [视频提示词示例](references/video-prompt-examples.md) | 按需参考的短提示词，不是固定九镜模板 |
+| [交付规范](references/delivery-contract.md) | 中文目录、TXT 提示词与可复用文件包 |
+| [人工回归用例](tests/regression-cases.txt) | 更新后需检查的行为边界，不是已完成性能测试 |
 | [九镜故事协议](references/nine-shot-story-protocol-v3.md) | 故事推进、连续性、镜头变化与逐镜恢复 |
 | [摄影质感与节奏](references/cinema-dna-v4-anti-ai.md) | 光学质感、细节控制与三联节奏 |
 | [单帧与三联方法库](references/cinema-dna-full-spec.md) | 焦段、构图、光线与题材参考；冲突时以核心规则为准 |
@@ -188,7 +227,7 @@ git clone --depth 1 https://github.com/dacnay816y62-hub/cinema-dna-21x9x3.git "$
 
 **它会生成视频吗？**
 
-当前交付是静态电影镜头和故事板。可以作为后续视频制作的参考，但不会自动变成含动作、对白和声音的完整视频。
+可以按需编写每镜可复制的视频动作与运镜提示词，附输入帧角色、首尾状态和导演控制卡。实际视频仍需要用户明确要求与可用后端；没有生成时只标注“提示词已检查，运动未验证”。
 
 **画面太脏、太油或太像游戏怎么办？**
 
@@ -206,7 +245,7 @@ Skill 帮助组织视觉判断和模型工具。好的剧本与好的画面共�
 
 反馈可提交到 [Issues](https://github.com/dacnay816y62-hub/cinema-dna-21x9x3/issues)，附上题材、所用工具、出错镜号和希望保留的内容。公开示例请使用已获准分享的素材，并清理私人资料与图片元数据。
 
-当前仓库未附加许可证。核心规则为 3.0 系列，最近的现有发行版为 [v3.0.1](https://github.com/dacnay816y62-hub/cinema-dna-21x9x3/releases/tag/v3.0.1)；主分支文档可继续更新。
+当前仓库未附加许可证。核心规则为 3.1 系列，本次发行版为 [v3.1.1](https://github.com/dacnay816y62-hub/cinema-dna-21x9x3/releases/tag/v3.1.1)；历史发行版仍保留，主分支文档可继续更新。
 
 ## English overview
 
@@ -214,7 +253,7 @@ Skill 帮助组织视觉判断和模型工具。好的剧本与好的画面共�
 
 Choose one frame, a three-shot triptych, or a nine-shot story. Generate each shot independently, review character and spatial continuity, replace only failed shots, then compose the finished frames externally. The core workflow targets approximately 2.39:1 frames; the repository name uses 21:9 as its widescreen label.
 
-The Skill provides shot design, prompts and orchestration. Image generation depends on the tools available in the host environment. Prompt-only requests stay text-only. Titles, posters and cover systems are added only when requested. This is a still-image and storyboard workflow, not a video generator.
+The Skill provides shot design, prompts and orchestration. Image generation depends on the tools available in the host environment. Prompt-only requests stay text-only. Titles, posters and cover systems are added only when requested. Version 3.1.1 also provides per-shot video motion prompts based on each input frame's actual action state. It preserves explicitly requested reference styles and recognizable manifested characters. Prompt files default to TXT with language-appropriate folders. Actual video generation requires a separate explicit request and a supported backend; ungenerated motion is not reported as verified.
 
 The six gallery examples are existing triptychs, not nine-shot benchmarks or a guarantee of reproducibility. The supplied nine-shot compositor uses PowerShell and `System.Drawing`; Windows is the recommended execution environment.
 
