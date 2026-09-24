@@ -92,7 +92,7 @@
   <li>
     <a href="skills/fantasy-life-force-portrait-photography"><strong>fantasy-life-force-portrait-photography</strong></a><br>
     将普通人像照片或主题转化为色彩鲜明、镜头亲密的生命感摄影作品与图像生成编辑方案<br>
-    <sub>同步时间：2026-09-06 07:37 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography">dacnay816y62-hub/fantasy-life-force-portrait-photography</a></sub>
+    <sub>同步时间：2026-09-25 03:52 · 来源：<a href="https://github.com/dacnay816y62-hub/fantasy-life-force-portrait-photography">dacnay816y62-hub/fantasy-life-force-portrait-photography</a></sub>
   </li>
   <li>
     <a href="skills/photo-revival"><strong>photo-revival</strong></a><br>
